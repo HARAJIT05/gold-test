@@ -16,10 +16,9 @@ export function Navbar() {
   ];
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-[11px] uppercase tracking-[2px] font-semibold transition-colors duration-200 pb-1 border-b-2 ${
-      isActive
-        ? 'text-gold-400 border-gold-400'
-        : 'text-white/70 border-transparent hover:text-gold-400 hover:border-gold-400/50'
+    `text-[11px] uppercase tracking-[2px] font-semibold transition-colors duration-200 pb-1 border-b-2 ${isActive
+      ? 'text-gold-400 border-gold-400'
+      : 'text-white/70 border-transparent hover:text-gold-400 hover:border-gold-400/50'
     }`;
 
   return (
@@ -45,7 +44,7 @@ export function Navbar() {
                 </div>
               )}
               <span className="font-serif font-bold text-xl tracking-tighter text-white leading-none">
-                GOLD KARIGAR
+                NABA
               </span>
             </Link>
 
@@ -84,10 +83,9 @@ export function Navbar() {
                 end={link.path === '/'}
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
-                  `block px-3 py-3 rounded-lg text-xs uppercase tracking-[1.5px] font-semibold transition-colors ${
-                    isActive
-                      ? 'text-gold-400 bg-navy-950'
-                      : 'text-white/70 hover:text-gold-400 hover:bg-navy-950'
+                  `block px-3 py-3 rounded-lg text-xs uppercase tracking-[1.5px] font-semibold transition-colors ${isActive
+                    ? 'text-gold-400 bg-navy-950'
+                    : 'text-white/70 hover:text-gold-400 hover:bg-navy-950'
                   }`
                 }
               >
