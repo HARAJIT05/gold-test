@@ -171,6 +171,7 @@ export default function AdminDashboard() {
       newSlides.push({
         id: Date.now(),
         image: "",
+        badge: "Artisanal Manufacturing",
         heading: "New Slide Heading",
         subheading: "Slide description",
         ctaText: "Click Here",
@@ -291,6 +292,17 @@ export default function AdminDashboard() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-400 mb-1">Badge Text</label>
+                          <input
+                            type="text"
+                            value={slide.badge || ''}
+                            onChange={(e) => updateSlide(index, 'badge', e.target.value)}
+                            className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                            placeholder="e.g. Artisanal Manufacturing"
+                          />
+                          <p className="text-[10px] text-gray-500 mt-1">Small label shown above the heading.</p>
+                        </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-400 mb-1">Heading</label>
                           <input 

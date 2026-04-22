@@ -102,20 +102,20 @@ export default function Home() {
   return (
     <div>
       {/* ── Hero Carousel ───────────────────────────────────── */}
-      <section className="relative overflow-hidden min-h-[580px]">
+      <section className="relative overflow-hidden min-h-[480px] md:min-h-[580px]">
 
         {slides.length === 0 ? (
           /* Fallback when no slides configured */
-          <div className="px-6 lg:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-center min-h-[580px] py-12 md:py-0">
+          <div className="px-6 lg:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-center min-h-[480px] md:min-h-[580px] py-16 md:py-0">
             <div className="col-span-1 md:col-span-5 flex flex-col gap-6">
               <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest w-fit">
                 Artisanal Manufacturing
               </span>
-              <h1 className="font-serif text-5xl md:text-6xl leading-[1.1] text-white">
+              <h1 className="font-serif text-4xl md:text-6xl leading-[1.1] text-white">
                 Heritage Craft,{" "}
                 <span className="italic font-light opacity-80">Modern Precision.</span>
               </h1>
-              <p className="text-sm text-gray-500 leading-relaxed max-w-sm">
+              <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
                 Bespoke gold jewelry direct from the Karigar. Live pricing, pure craftsmanship.
               </p>
               <Link
@@ -137,7 +137,6 @@ export default function Home() {
           </div>
         ) : (
           <>
-            {/* Slide content */}
             <AnimatePresence custom={direction} mode="wait">
               <motion.div
                 key={activeSlide}
@@ -147,51 +146,77 @@ export default function Home() {
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.45, ease: "easeInOut" }}
-                className="px-6 lg:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-center min-h-[580px] py-12 md:py-0"
+                className="relative w-full min-h-[480px] md:min-h-[580px]"
               >
-                {/* Left text content */}
-                <div className="col-span-1 md:col-span-5 flex flex-col gap-6 z-10">
-                  <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest w-fit">
-                    Artisanal Manufacturing
-                  </span>
-                  <h1 className="font-serif text-5xl md:text-6xl leading-[1.1] text-white">
-                    {activeSlideData?.heading || "Heritage Craft, Modern Precision."}
-                  </h1>
-                  <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
-                    {activeSlideData?.subheading || "Bespoke gold jewelry direct from the Karigar."}
-                  </p>
-                  {activeSlideData?.ctaText && (
-                    <Link
-                      to={activeSlideData.ctaLink || "/catalog"}
-                      className="inline-flex items-center justify-center bg-gold-400 text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors w-fit"
-                    >
-                      {activeSlideData.ctaText}
-                    </Link>
+                {/* ── MOBILE: full-bleed background image with overlay ── */}
+                <div className="md:hidden absolute inset-0 z-0">
+                  {activeSlideData?.image ? (
+                    <img
+                      src={activeSlideData.image}
+                      alt={activeSlideData?.heading}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <img
+                      src="https://picsum.photos/seed/goldbangle/800/800"
+                      alt="Gold Jewelry"
+                      className="w-full h-full object-cover opacity-40"
+                    />
                   )}
+                  {/* Dark gradient overlay so text is readable */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-navy-950/20" />
                 </div>
 
-                {/* Right image */}
-                <div className="col-span-1 md:col-span-5 col-start-1 md:col-start-7 hidden md:block">
-                  <div className="w-full h-[500px] bg-navy-800 overflow-hidden border-[12px] border-navy-900 shadow-[0_10px_60px_rgba(0,0,0,0.3)] rounded-[400px_400px_0_0] relative">
-                    {activeSlideData?.image ? (
-                      <img
-                        src={activeSlideData.image}
-                        alt={activeSlideData.heading}
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <img
-                          src="https://picsum.photos/seed/goldbangle/800/800"
-                          alt="Gold Jewelry"
-                          className="w-full h-full object-cover opacity-40"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <p className="text-white/30 text-sm font-serif italic">No image set</p>
-                        </div>
-                      </div>
+                {/* ── Shared content grid ── */}
+                <div className="relative z-10 px-6 lg:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-center min-h-[480px] md:min-h-[580px] py-20 md:py-0">
+
+                  {/* Left / bottom text */}
+                  <div className="col-span-1 md:col-span-5 flex flex-col gap-5 mt-auto md:mt-0">
+                    {(activeSlideData?.badge) && (
+                      <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest w-fit">
+                        {activeSlideData.badge}
+                      </span>
                     )}
+                    <h1 className="font-serif text-4xl md:text-6xl leading-[1.1] text-white drop-shadow-md">
+                      {activeSlideData?.heading || "Heritage Craft, Modern Precision."}
+                    </h1>
+                    <p className="text-sm text-gray-300 md:text-gray-400 leading-relaxed max-w-sm drop-shadow">
+                      {activeSlideData?.subheading || "Bespoke gold jewelry direct from the Karigar."}
+                    </p>
+                    {activeSlideData?.ctaText && (
+                      <Link
+                        to={activeSlideData.ctaLink || "/catalog"}
+                        className="inline-flex items-center justify-center bg-gold-400 text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors w-fit shadow-lg"
+                      >
+                        {activeSlideData.ctaText}
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Right image — desktop only */}
+                  <div className="col-span-1 md:col-span-5 col-start-1 md:col-start-7 hidden md:block">
+                    <div className="w-full h-[500px] bg-navy-800 overflow-hidden border-[12px] border-navy-900 shadow-[0_10px_60px_rgba(0,0,0,0.3)] rounded-[400px_400px_0_0] relative">
+                      {activeSlideData?.image ? (
+                        <img
+                          src={activeSlideData.image}
+                          alt={activeSlideData.heading}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-navy-800">
+                          <img
+                            src="https://picsum.photos/seed/goldbangle/800/800"
+                            alt="Gold Jewelry"
+                            className="w-full h-full object-cover opacity-40"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <p className="text-white/30 text-sm font-serif italic">No image set</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -202,24 +227,24 @@ export default function Home() {
               <>
                 <button
                   onClick={prevSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-navy-900/80 border border-white/10 flex items-center justify-center text-white hover:bg-navy-800 hover:border-gold-400/40 transition-all z-20 backdrop-blur-sm"
+                  className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-navy-900/80 border border-white/10 flex items-center justify-center text-white hover:bg-navy-800 hover:border-gold-400/40 transition-all z-20 backdrop-blur-sm"
                   aria-label="Previous slide"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
                 <button
                   onClick={nextSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-navy-900/80 border border-white/10 flex items-center justify-center text-white hover:bg-navy-800 hover:border-gold-400/40 transition-all z-20 backdrop-blur-sm"
+                  className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-navy-900/80 border border-white/10 flex items-center justify-center text-white hover:bg-navy-800 hover:border-gold-400/40 transition-all z-20 backdrop-blur-sm"
                   aria-label="Next slide"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
               </>
             )}
 
             {/* Dot indicators */}
             {slides.length > 1 && (
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                 {slides.map((_, idx) => (
                   <button
                     key={idx}
@@ -228,7 +253,7 @@ export default function Home() {
                     className={`rounded-full transition-all duration-300 ${
                       idx === activeSlide
                         ? "bg-gold-400 w-6 h-2"
-                        : "bg-white/25 w-2 h-2 hover:bg-white/50"
+                        : "bg-white/30 w-2 h-2 hover:bg-white/60"
                     }`}
                   />
                 ))}
@@ -237,7 +262,7 @@ export default function Home() {
 
             {/* Slide counter */}
             {slides.length > 1 && (
-              <div className="absolute bottom-6 right-6 text-[10px] font-bold uppercase tracking-widest text-white/30 z-20">
+              <div className="absolute bottom-5 right-5 text-[10px] font-bold uppercase tracking-widest text-white/30 z-20 hidden md:block">
                 {activeSlide + 1} / {slides.length}
               </div>
             )}

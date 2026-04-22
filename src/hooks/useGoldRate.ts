@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 export interface HeroSlide {
   id: number;
   image: string;
+  badge: string;
   heading: string;
   subheading: string;
   ctaText: string;
@@ -18,6 +19,7 @@ const defaultSlides: HeroSlide[] = [
   {
     id: 1,
     image: "",
+    badge: "Artisanal Manufacturing",
     heading: "Heritage Craft, Modern Precision.",
     subheading: "Bespoke gold jewelry direct from the Karigar.",
     ctaText: "Browse Catalog",
