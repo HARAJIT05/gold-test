@@ -44,7 +44,7 @@ export function Navbar() {
               <img
                 src={rate.logoUrl || '/naba-logo.png'}
                 alt="NABA Logo"
-                className="h-14 w-auto object-contain"
+                className="h-20 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
               <span className="font-serif font-bold text-3xl tracking-tighter text-white leading-none">
