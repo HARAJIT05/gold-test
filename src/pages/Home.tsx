@@ -169,10 +169,10 @@ export default function Home() {
                 </div>
 
                 {/* ── Shared content grid ── */}
-                <div className="relative z-10 px-6 lg:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-center min-h-[480px] md:min-h-[580px] py-20 md:py-0">
+                <div className="relative z-10 px-6 lg:px-12 grid grid-cols-1 md:grid-cols-12 items-center min-h-[480px] md:min-h-[580px] py-20 md:py-0">
 
                   {/* Left / bottom text */}
-                  <div className="col-span-1 md:col-span-5 flex flex-col gap-5 mt-auto md:mt-0">
+                  <div className="col-span-1 md:col-span-6 flex flex-col gap-5 mt-auto md:mt-0">
                     {(activeSlideData?.badge) && (
                       <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest w-fit">
                         {activeSlideData.badge}
@@ -194,30 +194,21 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* Right image — desktop only */}
-                  <div className="col-span-1 md:col-span-5 col-start-1 md:col-start-7 hidden md:block">
-                    <div className="w-full h-[500px] bg-navy-800 overflow-hidden border-[12px] border-navy-900 shadow-[0_10px_60px_rgba(0,0,0,0.3)] rounded-[400px_400px_0_0] relative">
-                      {activeSlideData?.image ? (
-                        <img
-                          src={activeSlideData.image}
-                          alt={activeSlideData.heading}
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-navy-800">
-                          <img
-                            src="https://picsum.photos/seed/goldbangle/800/800"
-                            alt="Gold Jewelry"
-                            className="w-full h-full object-cover opacity-40"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <p className="text-white/30 text-sm font-serif italic">No image set</p>
-                          </div>
-                        </div>
-                      )}
+                  {/* Right image — desktop: full-height bleed, no border, fades left into bg */}
+                  {activeSlideData?.image && (
+                    <div className="hidden md:block absolute inset-y-0 right-0 w-[55%] z-0 pointer-events-none">
+                      <img
+                        src={activeSlideData.image}
+                        alt={activeSlideData.heading}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                      {/* Left-to-right gradient: opaque navy on left, transparent on right */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/60 to-transparent" />
+                      {/* Top and bottom soft fade */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-navy-950/30 via-transparent to-navy-950/30" />
                     </div>
-                  </div>
+                  )}
                 </div>
               </motion.div>
             </AnimatePresence>
