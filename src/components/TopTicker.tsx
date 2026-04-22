@@ -6,7 +6,7 @@ export function TopTicker() {
   if (loading) return null;
 
   const separator = '\u00a0\u00a0\u00a0\u00a0\u2727\u00a0\u00a0\u00a0\u00a0';
-  const msg = `Today's Gold Rate\u00a0\u00a0\u2014\u00a0\u00a0 22K : \u20b9${rate.rate22k}/g ${separator}`;
+  const msg = `Today's Gold Rate\u00a0\u00a0\u2014\u00a0\u00a0 24K : \u20b9${rate.rate24k}/g \u00a0\u00a0|\u00a0\u00a0 22K : \u20b9${rate.rate22k}/g ${separator}`;
 
   // Repeat the message enough times to fill a seamless loop
   const repeated = Array(6).fill(msg).join('');

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { fetchLive22KRateINR, LiveGoldRate } from '../lib/goldMarketRate';
+import { fetchLiveRatesINR, LiveGoldRate } from '../lib/goldMarketRate';
 
 export interface HeroSlide {
   id: number;
@@ -31,10 +31,15 @@ const defaultSlides: HeroSlide[] = [
 export interface GoldRateState {
   /** Effective 22K rate in INR/gram. Admin override if set, else live market rate. */
   rate22k: number;
+  /** Effective 24K rate in INR/gram. Admin override if set, else live market rate. */
+  rate24k: number;
   /** The live market-fetched 22K rate (always from API, regardless of admin override). */
   marketRate22k: number;
+  /** The live market-fetched 24K rate. */
+  marketRate24k: number;
   /** The rate manually set by the admin in Supabase (0 = not overridden). */
   adminRate22k: number;
+  adminRate24k: number;
   /** True when admin override is active (adminRate22k > 0). */
   isAdminOverride: boolean;
   logoUrl: string;
@@ -49,8 +54,11 @@ const MARKET_REFRESH_MS = 30 * 60 * 1000;
 export function useGoldRate() {
   const [rate, setRate] = useState<GoldRateState>({
     rate22k: 0,
+    rate24k: 0,
     marketRate22k: 0,
+    marketRate24k: 0,
     adminRate22k: 0,
+    adminRate24k: 0,
     isAdminOverride: false,
     logoUrl: "",
     homeConfig: { heroSlides: defaultSlides },
@@ -65,7 +73,7 @@ export function useGoldRate() {
       // Fetch both sources in parallel
       const [supabaseResult, liveRate] = await Promise.all([
         supabase.from('settings').select('*').eq('id', 'goldRate').single(),
-        fetchLive22KRateINR(),
+        fetchLiveRatesINR(),
       ]);
 
       const { data, error } = supabaseResult;
@@ -76,13 +84,18 @@ export function useGoldRate() {
 
       const config = data?.homeConfig || {};
       const adminRate = data?.rate22k || 0;
+      const adminRate24k = data?.rate24k || 0;
       const marketRate = liveRate?.rate22k || 0;
+      const marketRate24 = liveRate?.rate24k || 0;
 
       setRate({
         rate22k: adminRate > 0 ? adminRate : marketRate,
+        rate24k: adminRate24k > 0 ? adminRate24k : marketRate24,
         marketRate22k: marketRate,
+        marketRate24k: marketRate24,
         adminRate22k: adminRate,
-        isAdminOverride: adminRate > 0,
+        adminRate24k: adminRate24k,
+        isAdminOverride: adminRate > 0 || adminRate24k > 0,
         logoUrl: data?.logoUrl || "",
         homeConfig: { ...config, heroSlides: config.heroSlides || defaultSlides },
         liveRateInfo: liveRate,
@@ -92,13 +105,15 @@ export function useGoldRate() {
 
       // Schedule periodic market rate refresh
       marketRefreshTimer = setInterval(async () => {
-        const refreshed = await fetchLive22KRateINR();
+        const refreshed = await fetchLiveRatesINR();
         if (!refreshed) return;
         setRate(prev => ({
           ...prev,
           marketRate22k: refreshed.rate22k,
+          marketRate24k: refreshed.rate24k,
           // Only update effective rate if admin hasn't overridden
           rate22k: prev.adminRate22k > 0 ? prev.adminRate22k : refreshed.rate22k,
+          rate24k: prev.adminRate24k > 0 ? prev.adminRate24k : refreshed.rate24k,
           liveRateInfo: refreshed,
         }));
       }, MARKET_REFRESH_MS);
@@ -118,11 +133,14 @@ export function useGoldRate() {
           if (newData && newData.id === 'goldRate') {
             const config = newData.homeConfig || {};
             const adminRate = newData.rate22k || 0;
+            const adminRate24k = newData.rate24k || 0;
             setRate(prev => ({
               ...prev,
               adminRate22k: adminRate,
-              isAdminOverride: adminRate > 0,
+              adminRate24k: adminRate24k,
+              isAdminOverride: adminRate > 0 || adminRate24k > 0,
               rate22k: adminRate > 0 ? adminRate : prev.marketRate22k,
+              rate24k: adminRate24k > 0 ? adminRate24k : prev.marketRate24k,
               logoUrl: newData.logoUrl || "",
               homeConfig: { ...config, heroSlides: config.heroSlides || defaultSlides },
             }));

@@ -19,12 +19,13 @@ const KARAT_22_FACTOR = 22 / 24;
 
 export interface LiveGoldRate {
   rate22k: number;       // INR per gram, 22K
+  rate24k: number;       // INR per gram, 24K
   usdPerOz: number;      // Raw gold spot price (USD/troy oz)
   usdToInr: number;      // Exchange rate used
   fetchedAt: Date;
 }
 
-export async function fetchLive22KRateINR(): Promise<LiveGoldRate | null> {
+export async function fetchLiveRatesINR(): Promise<LiveGoldRate | null> {
   try {
     const [goldRes, fxRes] = await Promise.all([
       fetch(GOLD_API_URL, { cache: 'no-store' }).catch(e => { console.error('Gold API fetch error:', e); return null; }),
@@ -53,9 +54,10 @@ export async function fetchLive22KRateINR(): Promise<LiveGoldRate | null> {
       return null;
     }
 
-    const rate22k = Math.round((usdPerOz / TROY_OZ_TO_GRAM) * usdToInr * KARAT_22_FACTOR);
+    const rate24k = Math.round((usdPerOz / TROY_OZ_TO_GRAM) * usdToInr);
+    const rate22k = Math.round(rate24k * KARAT_22_FACTOR);
 
-    return { rate22k, usdPerOz, usdToInr, fetchedAt: new Date() };
+    return { rate22k, rate24k, usdPerOz, usdToInr, fetchedAt: new Date() };
   } catch (err) {
     console.warn('[GoldRate] Failed to fetch live rate:', err);
     return null;
