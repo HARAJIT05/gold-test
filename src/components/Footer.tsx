@@ -1,15 +1,29 @@
 import { Link } from 'react-router-dom';
 import { Phone, MapPin } from 'lucide-react';
+import { useGoldRate } from '../hooks/useGoldRate';
 
 export function Footer() {
+  const { rate } = useGoldRate();
+
   return (
     <footer className="bg-navy-950 text-white border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 py-12 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <Link to="/" className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-gold-400 flex items-center justify-center text-white text-xs font-serif italic shadow-sm">GK</div>
-              <span className="font-serif font-bold text-xl tracking-tighter text-white">GOLD KARIGAR</span>
+            <Link to="/" className="flex items-center gap-4 mb-6">
+              {rate.logoUrl ? (
+                <img
+                  src={rate.logoUrl}
+                  alt="NABA Logo"
+                  className="h-14 w-auto object-contain"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gold-400 flex items-center justify-center text-white text-lg font-serif italic shadow-sm flex-shrink-0">
+                  GK
+                </div>
+              )}
+              <span className="font-serif font-bold text-3xl tracking-tighter text-white">NABA</span>
             </Link>
             <p className="text-gray-400 text-xs leading-relaxed max-w-sm mb-6">
               Exquisite, handcrafted gold jewelry preserving tradition and blending modern elegance. Your trusted gold manufacturing partner since 1992.
@@ -65,7 +79,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-[10px] uppercase tracking-widest text-gray-500 flex flex-col md:flex-row justify-between items-center">
-          <p>&copy; {new Date().getFullYear()} Gold Karigar Workshop. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} NABA. All rights reserved.</p>
           <div className="mt-4 md:mt-0 space-x-6 font-bold">
             <Link to="#" className="hover:text-gold-400 text-gray-500 transition-colors">Privacy Policy</Link>
             <Link to="#" className="hover:text-gold-400 text-gray-500 transition-colors">Terms</Link>

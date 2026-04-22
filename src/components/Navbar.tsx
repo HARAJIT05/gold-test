@@ -27,23 +27,23 @@ export function Navbar() {
       <nav className="bg-navy-950 border-b border-white/5">
         {/* Full-width bar — no max-width constraint so logo truly starts from the left edge */}
         <div className="w-full px-6 lg:px-12">
-          <div className="flex items-center h-20">
+          <div className="flex items-center h-24">
 
             {/* Logo — always hard-left */}
-            <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+            <Link to="/" className="flex items-center gap-4 flex-shrink-0">
               {rate.logoUrl ? (
                 <img
                   src={rate.logoUrl}
-                  alt="Gold Karigar Logo"
-                  className="h-9 w-auto object-contain"
+                  alt="NABA Logo"
+                  className="h-14 w-auto object-contain"
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gold-400 flex items-center justify-center text-white text-xs font-serif italic shadow-sm flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-gold-400 flex items-center justify-center text-white text-lg font-serif italic shadow-sm flex-shrink-0">
                   GK
                 </div>
               )}
-              <span className="font-serif font-bold text-xl tracking-tighter text-white leading-none">
+              <span className="font-serif font-bold text-3xl tracking-tighter text-white leading-none">
                 NABA
               </span>
             </Link>

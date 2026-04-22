@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS products (
   "makingCharge"  numeric     NOT NULL,
   "chargeType"    text        NOT NULL
                   CHECK ("chargeType" IN ('flat', 'percentage')),
+  "goldKarat"     text        NOT NULL DEFAULT '22K'
+                  CHECK ("goldKarat" IN ('22K', '24K')),
   images          text[]      DEFAULT '{}',
   "popularityScore" integer   DEFAULT 0,
   category        text        NOT NULL,
@@ -74,6 +76,7 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 -- Safe column additions (run even if table already existed)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS "goldKarat" text DEFAULT '22K' CHECK ("goldKarat" IN ('22K', '24K'));
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "stockQuantity" integer DEFAULT 0;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "popularityScore" integer DEFAULT 0;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "isHidden" boolean DEFAULT false;
@@ -130,10 +133,16 @@ VALUES (
   7400,
   '',
   '{
-    "heroImage": "",
-    "featuredImage1": "",
-    "featuredImage2": "",
-    "featuredImage3": ""
+    "heroSlides": [
+      {
+        "id": 1,
+        "image": "",
+        "heading": "Heritage Craft, Modern Precision.",
+        "subheading": "Bespoke gold jewelry direct from the Karigar.",
+        "ctaText": "Browse Catalog",
+        "ctaLink": "/catalog"
+      }
+    ]
   }'::jsonb,
   extract(epoch from now()) * 1000
 )

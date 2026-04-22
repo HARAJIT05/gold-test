@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { Loader2, CheckCircle, XCircle, Trash2, Star, Plus, X, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -78,7 +78,7 @@ export default function AdminReviews() {
     return Object.keys(errors).length === 0;
   };
 
-  const saveReview = async (e: React.FormEvent) => {
+  const saveReview = async (e: FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsSaving(true);

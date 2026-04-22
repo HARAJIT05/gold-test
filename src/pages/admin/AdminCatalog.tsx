@@ -52,6 +52,7 @@ export default function AdminCatalog() {
       weightInGrams: "",
       makingCharge: "",
       chargeType: "flat",
+      goldKarat: "22K",
       images: [],
       popularityScore: 0,
       category: "Bangle",
@@ -196,8 +197,12 @@ export default function AdminCatalog() {
     }));
   };
 
-  const inputClass = (err: boolean) => 
+  const inputClass = (err: boolean) =>
     `w-full border-b ${err ? 'border-red-400' : 'border-black/10'} px-0 py-2 bg-transparent focus:ring-0 focus:border-gold-400 outline-none transition-colors rounded-none text-white`;
+
+  // Selects need an explicit dark background so dropdown options are readable
+  const selectClass = (err = false) =>
+    `w-full border-b ${err ? 'border-red-400' : 'border-black/10'} px-0 py-2 bg-navy-900 focus:ring-0 focus:border-gold-400 outline-none transition-colors rounded-none text-white [&>option]:bg-navy-900 [&>option]:text-white`;
 
   return (
     <div className="relative">
@@ -321,16 +326,28 @@ export default function AdminCatalog() {
                          {formErrors.title && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{formErrors.title}</p>}
                       </div>
 
-                      <div className="sm:col-span-2">
+                      <div>
                          <label className="block text-[10px] uppercase font-bold tracking-widest text-white/60 mb-2">Category</label>
-                         <select 
-                           value={currentProduct.category} 
-                           onChange={e => setCurrentProduct({...currentProduct, category: e.target.value})} 
-                           className={inputClass(false)}
+                         <select
+                           value={currentProduct.category}
+                           onChange={e => setCurrentProduct({...currentProduct, category: e.target.value})}
+                           className={selectClass()}
                          >
                            {['Bangle', 'Ring', 'Necklace', 'Earring', 'Chain', 'Pendant'].map(c => (
                              <option key={c} value={c}>{c}</option>
                            ))}
+                         </select>
+                      </div>
+
+                      <div>
+                         <label className="block text-[10px] uppercase font-bold tracking-widest text-white/60 mb-2">Gold Karat</label>
+                         <select
+                           value={currentProduct.goldKarat || '22K'}
+                           onChange={e => setCurrentProduct({...currentProduct, goldKarat: e.target.value})}
+                           className={selectClass()}
+                         >
+                           <option value="22K">22 Karat (22K)</option>
+                           <option value="24K">24 Karat (24K)</option>
                          </select>
                       </div>
 
@@ -370,7 +387,7 @@ export default function AdminCatalog() {
                          <select 
                            value={currentProduct.chargeType} 
                            onChange={e => setCurrentProduct({...currentProduct, chargeType: e.target.value})} 
-                           className={inputClass(false)}
+                           className={selectClass()}
                          >
                            <option value="flat">Flat Amount (₹)</option>
                            <option value="percentage">Percentage (%)</option>

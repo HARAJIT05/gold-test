@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth, signInWithEmail, signOut } from "../../hooks/useAuth";
 import { Loader2, ShieldCheck, Mail, Lock, LogOut } from "lucide-react";
@@ -31,7 +31,7 @@ export default function AdminLogin() {
     );
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setLoggingIn(true);
     setError("");
@@ -68,7 +68,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="w-full border-b border-white/10 pl-8 pr-0 py-2 focus:ring-0 focus:border-gold-400 outline-none transition-colors bg-transparent rounded-none text-white placeholder-white/30"
-                placeholder="admin@goldkarigar.com"
+                placeholder="admin@naba.com"
               />
             </div>
           </div>

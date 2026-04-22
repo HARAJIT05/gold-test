@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef , FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronLeft, ChevronRight, MessageCircle, Send, Loader2, Scale, Tag, Package } from 'lucide-react';
 
@@ -9,6 +9,7 @@ interface Product {
   weightInGrams: number;
   makingCharge: number;
   chargeType: 'flat' | 'percentage';
+  goldKarat: '22K' | '24K';
   images: string[];
   popularityScore: number;
   category: string;
@@ -21,12 +22,15 @@ interface Props {
   product: Product;
   price: number;
   rate22k: number;
+  rate24k: number;
   onClose: () => void;
 }
 
 const WHATSAPP_NUMBER = '916295517205';
 
-export function ProductModal({ product, price, rate22k, onClose }: Props) {
+export function ProductModal({ product, price, rate22k, rate24k, onClose }: Props) {
+  const karat = product.goldKarat || '22K';
+  const activeRate = karat === '24K' ? rate24k : rate22k;
   const [activeImg, setActiveImg] = useState(0);
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '' });
@@ -40,13 +44,13 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
     scrollRef.current.scrollBy({ left: dir === 'right' ? 80 : -80, behavior: 'smooth' });
   };
 
-  const handleEnquire = (e: React.FormEvent) => {
+  const handleEnquire = (e: FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.phone.trim()) return;
     setSending(true);
 
     const text = encodeURIComponent(
-      `Hello! I'm interested in this product from Gold Karigar.\n\n` +
+      `Hello! I'm interested in this product from NABA.\n\n` +
       `*Product:* ${product.title}\n` +
       `*Category:* ${product.category}\n` +
       `*Weight:* ${product.weightInGrams}g\n` +
@@ -212,7 +216,7 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
                 </p>
 
                 {/* Stats row */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-2">
                   <div className="bg-navy-950 rounded-xl p-3 flex flex-col items-center gap-1 border border-white/5">
                     <Scale className="w-4 h-4 text-gold-400" />
                     <span className="text-white font-bold text-sm">{product.weightInGrams}g</span>
@@ -224,6 +228,16 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
                       {product.chargeType === 'flat' ? `₹${product.makingCharge}` : `${product.makingCharge}%`}
                     </span>
                     <span className="text-gray-500 text-[10px] uppercase tracking-wide">Making</span>
+                  </div>
+                  <div className={`rounded-xl p-3 flex flex-col items-center gap-1 border ${
+                    karat === '24K'
+                      ? 'bg-amber-400/10 border-amber-400/30'
+                      : 'bg-gold-400/10 border-gold-400/20'
+                  }`}>
+                    <span className={`text-lg font-black leading-none ${
+                      karat === '24K' ? 'text-amber-400' : 'text-gold-400'
+                    }`}>{karat}</span>
+                    <span className="text-gray-500 text-[10px] uppercase tracking-wide">Karat</span>
                   </div>
                   <div className="bg-navy-950 rounded-xl p-3 flex flex-col items-center gap-1 border border-white/5">
                     <Package className="w-4 h-4 text-gold-400" />
@@ -238,10 +252,11 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
                 <div className="bg-gradient-to-r from-gold-400/10 to-gold-500/5 border border-gold-400/20 rounded-2xl p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest text-gold-400/70 font-bold mb-1">
+                      <p className="text-[10px] uppercase tracking-widest text-gold-400/70 font-bold mb-1 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
                         Live Estimated Price
                       </p>
-                      {rate22k > 0 ? (
+                      {activeRate > 0 ? (
                         <p className="font-serif text-3xl font-bold text-gold-400">
                           ₹{price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </p>
@@ -250,12 +265,12 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
                       )}
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">22K Rate</p>
-                      <p className="text-white font-medium text-sm">₹{rate22k}/g</p>
+                      <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">{karat} Rate</p>
+                      <p className="text-white font-medium text-sm">₹{activeRate.toLocaleString('en-IN')}/g</p>
                     </div>
                   </div>
                   <p className="text-[10px] text-gray-500 mt-2">
-                    * Price is calculated based on today's live 22K gold rate. Final price may vary.
+                    * Price calculated on today's live {karat} gold rate. Final price may vary.
                   </p>
                 </div>
 

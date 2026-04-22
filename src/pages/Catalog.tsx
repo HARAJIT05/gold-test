@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useGoldRate } from '../hooks/useGoldRate';
 import { motion } from 'motion/react';
-import { Filter, Loader2, Search, Eye } from 'lucide-react';
+import { Filter, Loader2, Search, Eye, Zap } from 'lucide-react';
 import { ProductModal } from '../components/ProductModal';
 
 interface Product {
@@ -12,6 +12,7 @@ interface Product {
   weightInGrams: number;
   makingCharge: number;
   chargeType: 'flat' | 'percentage';
+  goldKarat: '22K' | '24K';
   images: string[];
   popularityScore: number;
   category: string;
@@ -23,7 +24,7 @@ interface Product {
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { rate } = useGoldRate();
+  const { rate, loading: rateLoading } = useGoldRate();
 
   const [sortParam, setSortParam] = useState<'popular' | 'price_asc' | 'price_desc'>('popular');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
@@ -36,7 +37,7 @@ export default function Catalog() {
     async function fetchProducts() {
       try {
         const { data } = await supabase.from('products').select('*').eq('isHidden', false);
-        if (data) setProducts(data);
+        if (data) setProducts(data as Product[]);
       } catch (err) {
         console.error('Error fetching products', err);
       } finally {
@@ -46,11 +47,14 @@ export default function Catalog() {
     fetchProducts();
   }, []);
 
+  // Karat-aware price calculation — uses live rate from useGoldRate (real-time)
   const calculatePrice = (p: Product) => {
-    const baseGoldPrice = p.weightInGrams * rate.rate22k;
+    const karat = p.goldKarat || '22K';
+    const baseRate = karat === '24K' ? rate.rate24k : rate.rate22k;
+    const baseGoldPrice = p.weightInGrams * baseRate;
     const makingTotal =
       p.chargeType === 'flat' ? p.makingCharge : baseGoldPrice * (p.makingCharge / 100);
-    return baseGoldPrice + makingTotal;
+    return Math.round(baseGoldPrice + makingTotal);
   };
 
   const categories = ['All', ...Array.from(new Set(products.map((p) => p.category)))];
@@ -67,7 +71,7 @@ export default function Catalog() {
       return sortParam === 'price_asc' ? priceA - priceB : priceB - priceA;
     });
     return result;
-  }, [products, categoryFilter, stockFilter, sortParam, rate.rate22k]);
+  }, [products, categoryFilter, stockFilter, sortParam, rate.rate22k, rate.rate24k]);
 
   if (loading) {
     return (
@@ -89,6 +93,20 @@ export default function Catalog() {
               Click any item to view details
             </span>
           </p>
+          {/* Live rate indicator */}
+          <div className="flex items-center gap-3 mt-2">
+            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+              Live Rates
+            </span>
+            {!rateLoading && rate.rate22k > 0 && (
+              <>
+                <span className="text-[10px] text-gray-500">22K: <span className="text-white font-semibold">₹{rate.rate22k.toLocaleString('en-IN')}/g</span></span>
+                <span className="text-[10px] text-gray-500">24K: <span className="text-white font-semibold">₹{rate.rate24k.toLocaleString('en-IN')}/g</span></span>
+              </>
+            )}
+            {rateLoading && <Loader2 className="w-3 h-3 animate-spin text-gray-500" />}
+          </div>
         </div>
 
         <div className="mt-6 md:mt-0 flex flex-wrap gap-3 items-center">
@@ -96,7 +114,7 @@ export default function Catalog() {
           <div className="flex items-center gap-2 bg-navy-900 px-4 py-2.5 border border-white/10 rounded-lg">
             <Filter className="w-4 h-4 text-gold-400 shrink-0" />
             <select
-              className="bg-navy-900 border-none outline-none text-sm font-medium text-white cursor-pointer"
+              className="bg-navy-900 border-none outline-none text-sm font-medium text-white cursor-pointer [&>option]:bg-navy-900 [&>option]:text-white"
               style={{ colorScheme: 'dark' }}
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -114,7 +132,7 @@ export default function Catalog() {
             <span className="text-gold-400 text-sm font-semibold">Stock</span>
             <span className="text-white/20">|</span>
             <select
-              className="bg-navy-900 border-none outline-none text-sm font-medium text-white cursor-pointer"
+              className="bg-navy-900 border-none outline-none text-sm font-medium text-white cursor-pointer [&>option]:bg-navy-900 [&>option]:text-white"
               style={{ colorScheme: 'dark' }}
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value as any)}
@@ -130,7 +148,7 @@ export default function Catalog() {
             <span className="text-gold-400 text-sm font-semibold">Sort</span>
             <span className="text-white/20">|</span>
             <select
-              className="bg-navy-900 border-none outline-none text-sm font-medium text-white cursor-pointer"
+              className="bg-navy-900 border-none outline-none text-sm font-medium text-white cursor-pointer [&>option]:bg-navy-900 [&>option]:text-white"
               style={{ colorScheme: 'dark' }}
               value={sortParam}
               onChange={(e) => setSortParam(e.target.value as any)}
@@ -154,6 +172,7 @@ export default function Catalog() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredAndSorted.map((product, idx) => {
             const price = calculatePrice(product);
+            const karat = product.goldKarat || '22K';
             return (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -184,6 +203,15 @@ export default function Catalog() {
                       +{product.images.length - 1} more
                     </div>
                   )}
+
+                  {/* Karat badge */}
+                  <div className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow ${
+                    karat === '24K'
+                      ? 'bg-amber-400 text-amber-900'
+                      : 'bg-gold-400/20 border border-gold-400/50 text-gold-300'
+                  }`}>
+                    {karat}
+                  </div>
 
                   {/* Hover overlay */}
                   <div className="absolute inset-0 bg-navy-950/0 group-hover:bg-navy-950/40 transition-all duration-300 flex items-center justify-center">
@@ -224,8 +252,9 @@ export default function Catalog() {
                   <div className="border-t border-dashed border-gold-400/20 pt-4 mt-auto">
                     <div className="flex justify-between items-end">
                       <div className="flex flex-col">
-                        <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">
-                          Live Est. Price
+                        <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">
+                          <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                          Live Est. · {karat}
                         </span>
                         {rate.rate22k > 0 ? (
                           <span className="font-serif text-xl font-bold text-gold-400">
@@ -256,6 +285,7 @@ export default function Catalog() {
           product={selectedProduct}
           price={calculatePrice(selectedProduct)}
           rate22k={rate.rate22k}
+          rate24k={rate.rate24k}
           onClose={() => setSelectedProduct(null)}
         />
       )}

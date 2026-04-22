@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { Loader2, TrendingUp, Sparkles, Save, UploadCloud } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useGoldRate, HeroSlide } from "../../hooks/useGoldRate";
+
 import { logAdminAction } from "../../lib/audit";
 
 export default function AdminDashboard() {
@@ -11,10 +13,7 @@ export default function AdminDashboard() {
     rate24k: 0, 
     logoUrl: "", 
     homeConfig: {
-      heroImage: "",
-      featuredImage1: "",
-      featuredImage2: "",
-      featuredImage3: ""
+      heroSlides: [] as HeroSlide[]
     }
   });
   const [loading, setLoading] = useState(true);
@@ -36,7 +35,7 @@ export default function AdminDashboard() {
              rate22k: data.rate22k || 0, 
              rate24k: data.rate24k || 0, 
              logoUrl: data.logoUrl || "",
-             homeConfig: data.homeConfig || { heroImage: "", featuredImage1: "", featuredImage2: "", featuredImage3: "" }
+             homeConfig: data.homeConfig || { heroSlides: [] }
           });
         }
       } catch (err) {
@@ -82,7 +81,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -119,26 +118,32 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleConfigImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: keyof typeof rates.homeConfig) => {
+  const handleSlideImageUpload = async (e: ChangeEvent<HTMLInputElement>, slideIndex: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingLogo(true); // Reusing uploadingLogo loading state for any image upload
+    setUploadingLogo(true);
     setMsg({ text: "Uploading image...", type: "" });
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${key}-${Date.now()}.${fileExt}`;
+      const fileName = `slide-${slideIndex}-${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('assets').upload(fileName, file);
       
       if (uploadError) throw uploadError;
       
       const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(fileName);
       
-      setRates(prev => ({
-        ...prev,
-        homeConfig: { ...prev.homeConfig, [key]: publicUrl }
-      }));
+      setRates(prev => {
+        const newSlides = [...(prev.homeConfig.heroSlides || [])];
+        if (newSlides[slideIndex]) {
+          newSlides[slideIndex].image = publicUrl;
+        }
+        return {
+          ...prev,
+          homeConfig: { ...prev.homeConfig, heroSlides: newSlides }
+        };
+      });
       setMsg({ text: "Image uploaded! Click 'Update System' to save changes.", type: "success" });
     } catch (err: any) {
       console.error(err);
@@ -146,6 +151,41 @@ export default function AdminDashboard() {
     } finally {
       setUploadingLogo(false);
     }
+  };
+
+  const updateSlide = (index: number, field: keyof HeroSlide, value: string) => {
+    setRates(prev => {
+      const newSlides = [...(prev.homeConfig.heroSlides || [])];
+      newSlides[index] = { ...newSlides[index], [field]: value };
+      return { ...prev, homeConfig: { ...prev.homeConfig, heroSlides: newSlides } };
+    });
+  };
+
+  const addSlide = () => {
+    setRates(prev => {
+      const newSlides = [...(prev.homeConfig.heroSlides || [])];
+      if (newSlides.length >= 4) {
+        setMsg({ text: "Maximum 4 slides allowed.", type: "error" });
+        return prev;
+      }
+      newSlides.push({
+        id: Date.now(),
+        image: "",
+        heading: "New Slide Heading",
+        subheading: "Slide description",
+        ctaText: "Click Here",
+        ctaLink: "/"
+      });
+      return { ...prev, homeConfig: { ...prev.homeConfig, heroSlides: newSlides } };
+    });
+  };
+
+  const removeSlide = (index: number) => {
+    setRates(prev => {
+      const newSlides = [...(prev.homeConfig.heroSlides || [])];
+      newSlides.splice(index, 1);
+      return { ...prev, homeConfig: { ...prev.homeConfig, heroSlides: newSlides } };
+    });
   };
 
   return (
@@ -229,54 +269,107 @@ export default function AdminDashboard() {
             </div>
             
             <div className="border-t border-gray-100 pt-6">
-              <h3 className="font-bold text-lg mb-4 text-white">Homepage Imagery</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-lg text-white">Hero Carousel Management</h3>
+                <button 
+                  onClick={addSlide}
+                  disabled={(rates.homeConfig.heroSlides || []).length >= 4}
+                  className="text-xs bg-gold-400 hover:bg-gold-500 text-white px-3 py-1.5 rounded disabled:opacity-50"
+                >
+                  + Add Slide
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mb-4">Manage up to 4 slides for the homepage hero section.</p>
+              
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Hero Section Banner</label>
-                  <div className="flex gap-4 items-center">
-                    <input 
-                      type="text"
-                      value={rates.homeConfig?.heroImage || ""}
-                      onChange={(e) => setRates({...rates, homeConfig: {...rates.homeConfig, heroImage: e.target.value}})}
-                      placeholder="https://picsum.photos/seed/goldbangle/800/800"
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 text-sm"
-                    />
-                    <label className={`shrink-0 px-4 py-2 bg-navy-800 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-100 text-sm font-medium ${uploadingLogo ? 'opacity-50' : ''}`}>
-                      <UploadCloud className="w-4 h-4 inline mr-1" /> Upload
-                      <input type="file" accept="image/*" onChange={(e) => handleConfigImageUpload(e, 'heroImage')} className="hidden" disabled={uploadingLogo} />
-                    </label>
-                  </div>
-                </div>
+                {(rates.homeConfig.heroSlides || []).map((slide, index) => (
+                  <div key={slide.id || index} className="bg-navy-800 p-4 rounded-xl border border-white/5 relative">
+                    <div className="absolute top-4 right-4">
+                      <button onClick={() => removeSlide(index)} className="text-red-500 hover:text-red-400 text-xs font-bold uppercase">Remove</button>
+                    </div>
+                    <h4 className="text-sm font-bold text-white mb-3">Slide {index + 1}</h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-400 mb-1">Heading</label>
+                          <input 
+                            type="text" 
+                            value={slide.heading} 
+                            onChange={(e) => updateSlide(index, 'heading', e.target.value)}
+                            className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-400 mb-1">Subheading</label>
+                          <textarea 
+                            value={slide.subheading} 
+                            onChange={(e) => updateSlide(index, 'subheading', e.target.value)}
+                            rows={2}
+                            className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white resize-none"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-400 mb-1">CTA Text</label>
+                            <input 
+                              type="text" 
+                              value={slide.ctaText} 
+                              onChange={(e) => updateSlide(index, 'ctaText', e.target.value)}
+                              className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-400 mb-1">CTA Link</label>
+                            <input 
+                              type="text" 
+                              value={slide.ctaLink} 
+                              onChange={(e) => updateSlide(index, 'ctaLink', e.target.value)}
+                              className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[1, 2, 3].map((i) => {
-                    const key = `featuredImage${i}` as keyof typeof rates.homeConfig;
-                    return (
-                      <div key={i} className="bg-navy-800 p-4 rounded border border-gray-200">
-                        <label className="block text-xs font-medium text-gray-300 mb-2">Featured Item {i}</label>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1">Background Image</label>
                         <div className="space-y-2">
-                           {rates.homeConfig?.[key] && (
-                             <img src={rates.homeConfig[key]} alt="featured" className="w-full h-24 object-cover rounded shadow-sm border border-black/5" />
+                           {slide.image ? (
+                             <div className="relative h-32 rounded overflow-hidden border border-white/10">
+                               <img src={slide.image} alt="Slide preview" className="w-full h-full object-cover" />
+                               <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                                 <label className="cursor-pointer bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs font-medium backdrop-blur-sm">
+                                    Replace Image
+                                    <input type="file" accept="image/*" onChange={(e) => handleSlideImageUpload(e, index)} className="hidden" disabled={uploadingLogo} />
+                                 </label>
+                               </div>
+                             </div>
+                           ) : (
+                             <div className="h-32 bg-navy-900 rounded border border-dashed border-white/20 flex flex-col items-center justify-center text-gray-500">
+                               <UploadCloud className="w-6 h-6 mb-2" />
+                               <label className="cursor-pointer text-gold-400 hover:text-gold-300 text-xs font-medium">
+                                  Upload Image
+                                  <input type="file" accept="image/*" onChange={(e) => handleSlideImageUpload(e, index)} className="hidden" disabled={uploadingLogo} />
+                               </label>
+                             </div>
                            )}
                            <input 
                              type="text"
-                             value={rates.homeConfig?.[key] || ""}
-                             onChange={(e) => setRates({...rates, homeConfig: {...rates.homeConfig, [key]: e.target.value}})}
-                             placeholder={`https://picsum.photos...`}
-                             className="w-full px-2 py-1.5 border border-gray-300 rounded text-xs outline-none"
+                             value={slide.image}
+                             onChange={(e) => updateSlide(index, 'image', e.target.value)}
+                             placeholder="Or paste image URL here..."
+                             className="w-full bg-navy-900 border border-white/10 rounded px-3 py-1.5 text-xs text-white"
                            />
-                           <label className="flex items-center justify-center gap-1 w-full py-1.5 bg-navy-900 border border-gray-300 rounded cursor-pointer hover:bg-gray-100 text-xs font-medium">
-                             <UploadCloud className="w-3 h-3" /> Upload
-                             <input type="file" accept="image/*" onChange={(e) => handleConfigImageUpload(e, key)} className="hidden" disabled={uploadingLogo} />
-                           </label>
-                           {rates.homeConfig?.[key] && (
-                             <button onClick={() => setRates({...rates, homeConfig: {...rates.homeConfig, [key]: ""}})} className="w-full text-xs text-red-500 py-1 hover:text-red-700">Clear</button>
-                           )}
                         </div>
                       </div>
-                    )
-                  })}
-                </div>
+                    </div>
+                  </div>
+                ))}
+                {(rates.homeConfig.heroSlides || []).length === 0 && (
+                  <div className="text-center py-8 text-gray-500 border border-dashed border-white/10 rounded-xl">
+                    No slides added. Click "+ Add Slide" to get started.
+                  </div>
+                )}
               </div>
             </div>
 

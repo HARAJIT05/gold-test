@@ -16,7 +16,7 @@ export default function About() {
         >
           <div className="border-l-2 border-gold-400 pl-8 py-2 mx-auto max-w-2xl mb-16">
             <p className="text-2xl leading-relaxed font-serif italic text-white/80">
-              "Since 1992, Gold Karigar has been a cornerstone of trust, purity, and unparalleled craftsmanship in Kalyan, Mumbai."
+              "Since 1992, NABA has been a cornerstone of trust, purity, and unparalleled craftsmanship in Kalyan, Mumbai."
             </p>
           </div>
           
