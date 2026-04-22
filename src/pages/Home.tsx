@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, Loader2, ChevronLeft, ChevronRight, Award, Shield, Gem } from "lucide-react";
+import { ArrowRight, Star, ChevronLeft, ChevronRight, Award, Shield, Gem } from "lucide-react";
 import { useGoldRate } from "../hooks/useGoldRate";
 import { supabase } from "../lib/supabase";
+
+/* ── Skeleton shimmer ── */
+const Sk = ({ className = "" }: { className?: string; key?: number | string }) => (
+  <div className={`relative overflow-hidden rounded bg-navy-800 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.5s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent ${className}`} />
+);
+
 
 /* ── Types ── */
 interface Product {
@@ -102,13 +108,27 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════
           1. FULL-SCREEN HERO
       ═══════════════════════════════════════════════════ */}
-      <section className="relative h-screen min-h-[600px] max-h-[900px] overflow-hidden">
+      <section className="relative w-full md:h-dvh md:min-h-[500px] md:max-h-[1000px] overflow-hidden bg-navy-950">
         {heroSlide?.image ? (
-          <img src={heroSlide.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          <>
+            <img
+              src={heroSlide.image}
+              alt=""
+              className="w-full h-auto md:h-full md:object-cover md:object-center"
+              referrerPolicy="no-referrer"
+            />
+            {/* Bottom fade */}
+            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-navy-950 to-transparent" />
+          </>
         ) : (
-          <img src="https://picsum.photos/seed/goldhero/1600/900" alt="" className="w-full h-full object-cover" />
+          <div className="w-full h-[60vw] md:h-full bg-navy-900 relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+          </div>
+
         )}
       </section>
+
+
 
 
       {/* ═══════════════════════════════════════════════════
@@ -254,7 +274,24 @@ export default function Home() {
             <div className="w-20 h-[2px] bg-gold-400 mx-auto rounded mt-5" />
           </div>
 
-          {loadingFeatured && <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-gold-400" /></div>}
+          {/* Loading skeletons */}
+          {loadingFeatured && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="bg-navy-900 rounded-2xl overflow-hidden border border-white/5">
+                  <Sk className="aspect-square w-full rounded-none" />
+                  <div className="p-6 space-y-3">
+                    <Sk className="h-5 w-3/4" />
+                    <Sk className="h-3 w-1/2" />
+                    <div className="flex justify-between pt-2">
+                      <Sk className="h-6 w-1/3" />
+                      <Sk className="h-4 w-12" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {!loadingFeatured && featuredProducts.length === 0 && (
             <div className="text-center py-20 border border-dashed border-white/10 rounded-2xl">
@@ -265,13 +302,21 @@ export default function Home() {
           {!loadingFeatured && featuredProducts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {featuredProducts.map((product, idx) => {
-                const imageUrl = product.images?.[0] || `https://picsum.photos/seed/${product.id}/600/600`;
+                const imageUrl = product.images?.[0];
                 const price = rate.rate22k > 0 ? calcPrice(product) : null;
                 return (
                   <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: idx * 0.12 }}>
                     <Link to="/catalog" state={{ openProductId: product.id }} className="block bg-navy-900 rounded-2xl overflow-hidden group border border-white/5 hover:border-gold-400/30 transition-all duration-300 hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)]">
                       <div className="aspect-square bg-navy-800 relative overflow-hidden">
-                        <img src={imageUrl} alt={product.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                        {imageUrl ? (
+                          <img src={imageUrl} alt={product.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                        ) : (
+                          /* Skeleton placeholder when no image uploaded */
+                          <div className="w-full h-full bg-navy-800 relative overflow-hidden flex items-center justify-center">
+                            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+                            <span className="text-white/10 text-xs font-bold uppercase tracking-widest">No Image</span>
+                          </div>
+                        )}
                         <div className="absolute top-4 left-4 flex gap-2">
                           {product.popularityScore > 0 && (
                             <span className="bg-gold-400 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
@@ -319,7 +364,25 @@ export default function Home() {
             <div className="w-20 h-[2px] bg-gold-400 mx-auto rounded mt-5" />
           </div>
 
-          {loadingReviews && <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-gold-400" /></div>}
+          {/* Loading skeletons */}
+          {loadingReviews && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="bg-navy-900 p-7 rounded-2xl border border-white/5 flex flex-col gap-4">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, j) => <Sk key={j} className="w-3.5 h-3.5 rounded-full" />)}
+                  </div>
+                  <Sk className="h-3 w-full" />
+                  <Sk className="h-3 w-5/6" />
+                  <Sk className="h-3 w-4/6" />
+                  <div className="mt-auto pt-4 border-t border-white/5 flex justify-between">
+                    <Sk className="h-3 w-24" />
+                    <Sk className="h-3 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {!loadingReviews && reviews.length === 0 && (
             <div className="text-center py-16 border border-dashed border-white/10 rounded-2xl mb-10">
