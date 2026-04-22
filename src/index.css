@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold-50: #FFFFFF;
+  --color-gold-100: #FFF9F2;
+  --color-gold-200: #FEE4C2;
+  --color-gold-300: #FDCB8A;
+  --color-gold-400: #FDB352;
+  --color-gold-500: #E69D3E;
+  --color-navy-800: #0f2a4a;
+  --color-navy-900: #0a1e35;
+  --color-navy-950: #061526;
+
+  --font-sans: 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Georgia', serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-navy-950);
+    color: var(--color-gold-50);
+    font-family: var(--font-sans);
+  }
+}

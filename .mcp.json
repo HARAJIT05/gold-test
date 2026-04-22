@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/mnt/gayms/Projects/naba-gold-karigar"
+      ]
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--supabase-url",
+        "${VITE_SUPABASE_URL}",
+        "--supabase-key",
+        "${VITE_SUPABASE_ANON_KEY}"
+      ],
+      "env": {
+        "VITE_SUPABASE_URL": "${VITE_SUPABASE_URL}",
+        "VITE_SUPABASE_ANON_KEY": "${VITE_SUPABASE_ANON_KEY}"
+      }
+    }
+  }
+}

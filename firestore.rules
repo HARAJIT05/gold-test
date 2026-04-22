@@ -1,0 +1,93 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      // Bootstrapped admin
+      return request.auth != null && request.auth.token.email == 'harajit05@gmail.com';
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Product ---
+    function isValidProduct(data) {
+      return data.keys().hasAll(['title', 'description', 'weightInGrams', 'makingCharge', 'chargeType', 'images', 'category', 'createdAt', 'updatedAt', 'isHidden', 'isOutofStock'])
+        && data.title is string && data.title.size() <= 200
+        && data.description is string && data.description.size() <= 5000
+        && data.weightInGrams is number
+        && data.makingCharge is number
+        && data.chargeType in ['flat', 'percentage']
+        && data.images is list && data.images.size() <= 20 && (data.images.size() == 0 || data.images[0] is string)
+        && data.popularityScore is number
+        && data.category is string && data.category.size() <= 100
+        && data.createdAt is number
+        && data.updatedAt is number
+        && data.isHidden is bool
+        && data.isOutofStock is bool;
+    }
+
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(productId) && isValidProduct(incoming());
+      allow update: if isAdmin() && isValidId(productId) && isValidProduct(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    // --- Gold Rate Settings ---
+    function isValidGoldRate(data) {
+      return data.keys().hasAll(['rate22k', 'rate24k', 'lastUpdated'])
+        && data.rate22k is number
+        && data.rate24k is number
+        && data.lastUpdated is number;
+    }
+
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId);
+      allow list: if true;
+      allow write: if isAdmin() && settingId == 'goldRate' && isValidGoldRate(incoming());
+    }
+
+    // --- Reviews ---
+    function isValidReview(data) {
+      return data.keys().hasAll(['customerName', 'rating', 'comment', 'isApproved', 'createdAt'])
+        && data.customerName is string && data.customerName.size() <= 200
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.comment is string && data.comment.size() <= 5000
+        && data.isApproved is bool
+        && data.createdAt is number;
+    }
+
+    match /reviews/{reviewId} {
+      allow get: if isValidId(reviewId) && (existing().isApproved == true || isAdmin());
+      allow list: if resource.data.isApproved == true || isAdmin();
+      
+      allow create: if isValidId(reviewId) && isValidReview(incoming()) 
+        && incoming().isApproved == false; 
+        
+      allow update: if isAdmin() && isValidId(reviewId) && isValidReview(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['isApproved']);
+        
+      allow delete: if isAdmin() && isValidId(reviewId);
+    }
+  }
+}

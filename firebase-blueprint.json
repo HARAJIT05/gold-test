@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A jewelry item in the catalog",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "weightInGrams": { "type": "number" },
+        "makingCharge": { "type": "number" },
+        "chargeType": { "type": "string", "enum": ["flat", "percentage"] },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "popularityScore": { "type": "number" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" },
+        "isHidden": { "type": "boolean" },
+        "isOutofStock": { "type": "boolean" }
+      },
+      "required": ["title", "description", "weightInGrams", "makingCharge", "chargeType", "images", "category", "createdAt", "updatedAt", "isHidden", "isOutofStock"]
+    },
+    "GoldRate": {
+      "title": "Gold Rate Setting",
+      "description": "Daily gold rate configuration",
+      "type": "object",
+      "properties": {
+        "rate22k": { "type": "number" },
+        "rate24k": { "type": "number" },
+        "lastUpdated": { "type": "number" }
+      },
+      "required": ["rate22k", "rate24k", "lastUpdated"]
+    },
+    "Review": {
+      "title": "Customer Review",
+      "description": "Customer testimonials",
+      "type": "object",
+      "properties": {
+        "customerName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "isApproved": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["customerName", "rating", "comment", "isApproved", "createdAt"]
+    },
+    "AdminProfile": {
+      "title": "Admin Profile",
+      "description": "Admin users",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin"] }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Catalog products"
+    },
+    "/settings/goldRate": {
+      "schema": { "$ref": "#/entities/GoldRate" },
+      "description": "System settings for gold rates"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Customer reviews"
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminProfile" },
+      "description": "Authorized admin users"
+    }
+  }
+}
