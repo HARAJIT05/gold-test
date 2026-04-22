@@ -143,11 +143,10 @@ export default function Home() {
                 Est. 1992 · Kalyan, Mumbai
               </span>
               <h2 className="font-serif text-3xl md:text-4xl text-white leading-snug mb-6">
-                Third-generation masters of 22K filigree and temple jewelry.
+                A Trusted Gold Manufacturing & Wholesale Brand.
               </h2>
               <p className="text-sm text-gray-400 leading-relaxed mb-8 max-w-md">
-                Since 1992, NABA has been a cornerstone of trust, purity, and unparalleled craftsmanship. Every piece tells a story of dedication — sculpted by hand, priced with total transparency.
-              </p>
+                NABA is a trusted gold manufacturing and wholesale brand with over 30 years of experience. With its own manufacturing unit and skilled goldsmiths, it crafts 22K and 24K gold with precision and purity. Along with ready-made products, it also specializes in custom-designed gold as per client requirements, making it a reliable and long-term business partner.              </p>
               <Link
                 to="/about"
                 className="inline-flex items-center gap-2 text-gold-400 hover:text-gold-300 text-xs font-bold uppercase tracking-widest transition-colors group"
