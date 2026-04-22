@@ -1,12 +1,22 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TopTicker } from './TopTicker';
 import { useGoldRate } from '../hooks/useGoldRate';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { rate } = useGoldRate();
+
+  // Dynamically update the browser favicon whenever the admin logo changes
+  useEffect(() => {
+    const favicon = document.getElementById('favicon') as HTMLLinkElement | null;
+    if (!favicon) return;
+    if (rate.logoUrl) {
+      favicon.href = rate.logoUrl;
+      favicon.type = 'image/png'; // most uploaded logos are PNG/JPG
+    }
+  }, [rate.logoUrl]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -31,18 +41,12 @@ export function Navbar() {
 
             {/* Logo — always hard-left */}
             <Link to="/" className="flex items-center gap-4 flex-shrink-0">
-              {rate.logoUrl ? (
-                <img
-                  src={rate.logoUrl}
-                  alt="NABA Logo"
-                  className="h-14 w-auto object-contain"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gold-400 flex items-center justify-center text-white text-lg font-serif italic shadow-sm flex-shrink-0">
-                  GK
-                </div>
-              )}
+              <img
+                src={rate.logoUrl || '/naba-logo.png'}
+                alt="NABA Logo"
+                className="h-14 w-auto object-contain"
+                referrerPolicy="no-referrer"
+              />
               <span className="font-serif font-bold text-3xl tracking-tighter text-white leading-none">
                 NABA
               </span>

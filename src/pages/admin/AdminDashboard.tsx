@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { supabase } from "../../lib/supabase";
-import { Loader2, TrendingUp, Sparkles, Save, UploadCloud } from "lucide-react";
+import { Loader2, TrendingUp, Save, UploadCloud } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useGoldRate, HeroSlide } from "../../hooks/useGoldRate";
 
@@ -10,7 +10,6 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const [rates, setRates] = useState({ 
     rate22k: 0, 
-    rate24k: 0, 
     logoUrl: "", 
     homeConfig: {
       heroSlides: [] as HeroSlide[]
@@ -33,7 +32,6 @@ export default function AdminDashboard() {
         if (data) {
           setRates({ 
              rate22k: data.rate22k || 0, 
-             rate24k: data.rate24k || 0, 
              logoUrl: data.logoUrl || "",
              homeConfig: data.homeConfig || { heroSlides: [] }
           });
@@ -56,7 +54,6 @@ export default function AdminDashboard() {
         .upsert({
           id: 'goldRate',
           rate22k: Number(rates.rate22k),
-          rate24k: Number(rates.rate24k),
           logoUrl: rates.logoUrl,
           homeConfig: rates.homeConfig,
           lastUpdated: Date.now()
@@ -68,7 +65,7 @@ export default function AdminDashboard() {
          await logAdminAction(
             user.email,
             'UPDATE_SETTINGS',
-            `Updated global settings. 22K: ₹${rates.rate22k}, 24K: ₹${rates.rate24k}`
+            `Updated global settings. 22K: ₹${rates.rate22k}`
          );
       }
 
@@ -223,18 +220,7 @@ export default function AdminDashboard() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1 flex items-center gap-1">24 Karat (per gram) <Sparkles className="w-3 h-3 text-gold-500" /></label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium font-mono">₹</span>
-                  <input 
-                    type="number"
-                    value={rates.rate24k || ""}
-                    onChange={(e) => setRates({...rates, rate24k: Number(e.target.value) || 0})}
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400 font-mono text-lg"
-                  />
-                </div>
-              </div>
+
             </div>
 
             <div className="border-t border-gray-100 pt-6">

@@ -48,7 +48,7 @@ export default function About() {
                 Transparency is at the heart of our operations. With our live pricing engine, you pay exactly for the gold weight and a fair making charge. No hidden fees, no inflated markups.
               </p>
               <p className="text-sm leading-relaxed text-gray-400">
-                All our products can be hallmarked to guarantee 22K or 24K purity, assuring you that your investment is as authentic as the design it holds.
+                All our products can be hallmarked to guarantee 22K purity, assuring you that your investment is as authentic as the design it holds.
               </p>
             </div>
             <div className="relative order-1 md:order-2">

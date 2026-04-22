@@ -347,7 +347,6 @@ export default function AdminCatalog() {
                            className={selectClass()}
                          >
                            <option value="22K">22 Karat (22K)</option>
-                           <option value="24K">24 Karat (24K)</option>
                          </select>
                       </div>
 

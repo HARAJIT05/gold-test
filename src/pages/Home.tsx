@@ -20,7 +20,7 @@ interface Product {
   weightInGrams: number;
   makingCharge: number;
   chargeType: "flat" | "percentage";
-  goldKarat: "22K" | "24K";
+  goldKarat: "22K";
   popularityScore: number;
   isHidden: boolean;
   isOutofStock: boolean;
@@ -89,7 +89,7 @@ export default function Home() {
   }, []);
 
   const calcPrice = (p: Product) => {
-    const baseRate = p.goldKarat === "24K" ? rate.rate24k : rate.rate22k;
+    const baseRate = rate.rate22k;
     const base = p.weightInGrams * baseRate;
     return Math.round(base + (p.chargeType === "flat" ? p.makingCharge : (base * p.makingCharge) / 100));
   };
@@ -146,7 +146,7 @@ export default function Home() {
                 A Trusted Gold Manufacturing & Wholesale Brand.
               </h2>
               <p className="text-sm text-gray-400 leading-relaxed mb-8 max-w-md">
-                NABA is a trusted gold manufacturing and wholesale brand with over 30 years of experience. With its own manufacturing unit and skilled goldsmiths, it crafts 22K and 24K gold with precision and purity. Along with ready-made products, it also specializes in custom-designed gold as per client requirements, making it a reliable and long-term business partner.              </p>
+                NABA is a trusted gold manufacturing and wholesale brand with over 30 years of experience. With its own manufacturing unit and skilled goldsmiths, it crafts 22K gold with precision and purity. Along with ready-made products, it also specializes in custom-designed gold as per client requirements, making it a reliable and long-term business partner.              </p>
               <Link
                 to="/about"
                 className="inline-flex items-center gap-2 text-gold-400 hover:text-gold-300 text-xs font-bold uppercase tracking-widest transition-colors group"

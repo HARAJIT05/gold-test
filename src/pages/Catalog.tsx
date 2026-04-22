@@ -12,7 +12,7 @@ interface Product {
   weightInGrams: number;
   makingCharge: number;
   chargeType: 'flat' | 'percentage';
-  goldKarat: '22K' | '24K';
+  goldKarat: '22K';
   images: string[];
   popularityScore: number;
   category: string;
@@ -50,7 +50,7 @@ export default function Catalog() {
   // Karat-aware price calculation — uses live rate from useGoldRate (real-time)
   const calculatePrice = (p: Product) => {
     const karat = p.goldKarat || '22K';
-    const baseRate = karat === '24K' ? rate.rate24k : rate.rate22k;
+    const baseRate = rate.rate22k;
     const baseGoldPrice = p.weightInGrams * baseRate;
     const makingTotal =
       p.chargeType === 'flat' ? p.makingCharge : baseGoldPrice * (p.makingCharge / 100);
@@ -71,7 +71,7 @@ export default function Catalog() {
       return sortParam === 'price_asc' ? priceA - priceB : priceB - priceA;
     });
     return result;
-  }, [products, categoryFilter, stockFilter, sortParam, rate.rate22k, rate.rate24k]);
+  }, [products, categoryFilter, stockFilter, sortParam, rate.rate22k]);
 
   if (loading) {
     return (
@@ -102,7 +102,6 @@ export default function Catalog() {
             {!rateLoading && rate.rate22k > 0 && (
               <>
                 <span className="text-[10px] text-gray-500">22K: <span className="text-white font-semibold">₹{rate.rate22k.toLocaleString('en-IN')}/g</span></span>
-                <span className="text-[10px] text-gray-500">24K: <span className="text-white font-semibold">₹{rate.rate24k.toLocaleString('en-IN')}/g</span></span>
               </>
             )}
             {rateLoading && <Loader2 className="w-3 h-3 animate-spin text-gray-500" />}
@@ -205,11 +204,7 @@ export default function Catalog() {
                   )}
 
                   {/* Karat badge */}
-                  <div className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow ${
-                    karat === '24K'
-                      ? 'bg-amber-400 text-amber-900'
-                      : 'bg-gold-400/20 border border-gold-400/50 text-gold-300'
-                  }`}>
+                  <div className="absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow bg-gold-400/20 border border-gold-400/50 text-gold-300">
                     {karat}
                   </div>
 
@@ -285,7 +280,6 @@ export default function Catalog() {
           product={selectedProduct}
           price={calculatePrice(selectedProduct)}
           rate22k={rate.rate22k}
-          rate24k={rate.rate24k}
           onClose={() => setSelectedProduct(null)}
         />
       )}
