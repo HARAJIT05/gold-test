@@ -8,14 +8,18 @@ const LOCATIONS = [
     address: 'Rajguru Niwas, Room No 4, Jijamata Colony, Narayanwadi, Kalyan (West), Pin - 421301',
     mapsUrl: 'https://maps.app.goo.gl/1K3iToLCCEd5mMD16',
     phone: '+91 98922 42785',
-    tel: '+919892242785 ',
+    phone1: '+91 99322 81366',
+    tel: '+919892242785',
+    tel1: '+919932281366',
   },
   {
-    label: 'Mumbai (Showroom)',
-    address: '307, OM GOLDEN BUILDING, Shaikh Memon Street Nearby Landmark COTTON EXCAHNGE, Kalbadevi, Mumbai, Maharashtra PIN 400002',
+    label: 'Mumbai (Branch)',
+    address: '307, OM GOLDEN BUILDING, Shaikh Memon Street Nearby Landmark COTTON EXCAHNGE, Kalbadevi, Mumbai, Maharashtra,Pin - 400002',
     mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Zaveri+Bazaar+Kalbadevi+Mumbai+Maharashtra',
-    phone: '+91 99322 81366',
-    tel: '+919932281366',
+    phone: '+91 98922 42785',
+    phone1: '+91 99322 81366',
+    tel: '+919892242785',
+    tel1: '+919932281366',
   },
 ];
 
@@ -44,7 +48,7 @@ export function Footer() {
             <div className="flex space-x-3">
               {/* WhatsApp */}
               <a
-                href="https://wa.me/919892242785"
+                href="https://wa.me/919330340211"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
@@ -102,16 +106,29 @@ export function Footer() {
                     </span>
                   </a>
 
-                  {/* Phone */}
-                  <a
-                    href={`tel:${loc.tel}`}
-                    className="flex items-center gap-2 group"
-                  >
-                    <Phone className="h-3.5 w-3.5 text-gold-400 shrink-0 group-hover:text-gold-300 transition-colors" />
-                    <span className="text-gray-400 text-xs group-hover:text-white transition-colors">
-                      {loc.phone}
-                    </span>
-                  </a>
+                  {/* Phones */}
+                  <div className="flex flex-col gap-1.5">
+                    <a
+                      href={`tel:${loc.tel}`}
+                      className="flex items-center gap-2 group"
+                    >
+                      <Phone className="h-3.5 w-3.5 text-gold-400 shrink-0 group-hover:text-gold-300 transition-colors" />
+                      <span className="text-gray-400 text-xs group-hover:text-white transition-colors">
+                        {loc.phone}
+                      </span>
+                    </a>
+                    {loc.phone1 && loc.tel1 && (
+                      <a
+                        href={`tel:${loc.tel1}`}
+                        className="flex items-center gap-2 group"
+                      >
+                        <Phone className="h-3.5 w-3.5 text-gold-400 shrink-0 group-hover:text-gold-300 transition-colors" />
+                        <span className="text-gray-400 text-xs group-hover:text-white transition-colors">
+                          {loc.phone1}
+                        </span>
+                      </a>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

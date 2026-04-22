@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, ChevronLeft, ChevronRight, Award, Shield, Gem } from "lucide-react";
+import { ArrowRight, Star, ChevronLeft, ChevronRight, Award, Shield, Gem, Users } from "lucide-react";
 import { useGoldRate } from "../hooks/useGoldRate";
 import { supabase } from "../lib/supabase";
 
@@ -156,9 +156,10 @@ export default function Home() {
             </motion.div>
 
             {/* Right — stat cards */}
-            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="grid grid-cols-2 gap-4">
               {[
                 { icon: <Award className="w-5 h-5 text-gold-400" />, num: "30+", label: "Years of Craft" },
+                { icon: <Users className="w-5 h-5 text-gold-400" />, num: "150+", label: "Gold Smiths" },
                 { icon: <Gem className="w-5 h-5 text-gold-400" />, num: "500+", label: "Unique Designs" },
                 { icon: <Shield className="w-5 h-5 text-gold-400" />, num: "100%", label: "Hallmarked Purity" },
               ].map(({ icon, num, label }) => (
