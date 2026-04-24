@@ -35,6 +35,18 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
   const [form, setForm] = useState({ name: '', phone: '' });
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState({ x: 50, y: 50, show: false });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoom({ x, y, show: true });
+  };
+
+  const handleMouseLeave = () => {
+    setZoom(prev => ({ ...prev, show: false }));
+  };
 
   const images = product.images?.length > 0 ? product.images : [];
 
@@ -48,16 +60,13 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
     if (!form.name.trim() || !form.phone.trim()) return;
     setSending(true);
 
-    const imageUrl = product.images?.[0] ? `*Image:* ${product.images[0]}\n` : '';
-
     const text = encodeURIComponent(
       `Hello! I'm interested in this product from NABA.\n\n` +
       `*Product:* ${product.title}\n` +
       `*Category:* ${product.category}\n` +
       `*Weight:* ${product.weightInGrams}g\n` +
-      `*Est. Price:* ₹${price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}\n` +
-      imageUrl +
-      `\n*My Name:* ${form.name}\n` +
+      `*Est. Price:* ₹${price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}\n\n` +
+      `*My Name:* ${form.name}\n` +
       `*Phone:* ${form.phone}\n\n` +
       `Please get in touch with me. Thank you!`
     );
@@ -107,12 +116,22 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
               {/* Main image */}
               <div className="flex-1 relative min-h-[260px] md:min-h-0">
                 {images.length > 0 ? (
-                  <img
-                    src={images[activeImg]}
-                    alt={product.title}
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
+                  <div
+                    className="w-full h-full cursor-zoom-in overflow-hidden relative"
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <img
+                      src={images[activeImg]}
+                      alt={product.title}
+                      className="w-full h-full object-cover transition-transform duration-200 ease-out"
+                      style={{
+                        transformOrigin: `${zoom.x}% ${zoom.y}%`,
+                        transform: zoom.show ? 'scale(2.5)' : 'scale(1)',
+                      }}
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
                     No Images Available

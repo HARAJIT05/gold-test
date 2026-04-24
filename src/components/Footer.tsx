@@ -114,6 +114,8 @@ export function Footer() {
               <li><Link to="/catalog" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">Collection</Link></li>
               <li><Link to="/reviews" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">Testimonials</Link></li>
               <li><Link to="/about" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">The Craft</Link></li>
+              <li><Link to="/privacy-policy" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">Terms & Conditions</Link></li>
             </ul>
           </div>
 
@@ -160,9 +162,8 @@ export function Footer() {
         {/* ── Bottom bar ── */}
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-[10px] uppercase tracking-widest text-gray-500 flex flex-col md:flex-row justify-between items-center">
           <p>&copy; {new Date().getFullYear()} NABA. All rights reserved.</p>
-          <div className="mt-4 md:mt-0 space-x-6 font-bold">
-            <Link to="/privacy-policy" className="hover:text-gold-400 text-gray-500 transition-colors">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-gold-400 text-gray-500 transition-colors">Terms</Link>
+          <div className="mt-4 md:mt-0 font-bold">
+            Made by : <a href="https://www.instagram.com/harajit.exe/" target="_blank" rel="noopener noreferrer" className="hover:text-gold-400 transition-colors">TEST</a>
           </div>
         </div>
       </div>
