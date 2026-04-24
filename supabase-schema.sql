@@ -383,6 +383,49 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_admin
 NOTIFY pgrst, 'reload schema';
 
 -- ============================================================
+-- SECTION 6: CATEGORIES & SUBCATEGORIES
+-- ============================================================
+
+-- 1. Categories table
+create table if not exists categories (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  slug text not null unique,
+  image text,
+  display_order int default 0,
+  created_at bigint
+);
+
+-- 2. Subcategories table
+create table if not exists subcategories (
+  id uuid default gen_random_uuid() primary key,
+  category_id uuid references categories(id) on delete cascade,
+  name text not null,
+  slug text not null,
+  image text,
+  display_order int default 0,
+  created_at bigint
+);
+
+-- 3. Add subCategory to products
+alter table products add column if not exists "subCategory" text default '';
+
+-- 4. RLS Policies
+alter table categories enable row level security;
+create policy "Public read categories" on categories for select using (true);
+create policy "Auth write categories" on categories for all using (auth.role() = 'authenticated');
+
+alter table subcategories enable row level security;
+create policy "Public read subcategories" on subcategories for select using (true);
+create policy "Auth write subcategories" on subcategories for all using (auth.role() = 'authenticated');
+
+-- 5. Indexes
+create index if not exists idx_categories_slug on categories(slug);
+create index if not exists idx_subcategories_category_id on subcategories(category_id);
+create index if not exists idx_products_subcategory on products("subCategory");
+
+
+-- ============================================================
 -- DONE!
 -- After running this script:
 --   ✓ All tables exist with correct columns

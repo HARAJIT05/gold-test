@@ -1,6 +1,6 @@
 import { Outlet, Navigate, Link } from "react-router-dom";
 import { useAuth, signOut } from "../hooks/useAuth";
-import { Settings, Package, MessageSquare, LogOut, Loader2, Menu, ClipboardList } from "lucide-react";
+import { Settings, Package, MessageSquare, LogOut, Loader2, Menu, ClipboardList, Layers } from "lucide-react";
 import { useState } from "react";
 
 export default function AdminLayout() {
@@ -22,6 +22,9 @@ export default function AdminLayout() {
       </Link>
       <Link onClick={() => setMobileMenuOpen(false)} to="/admin/catalog" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-navy-800 transition-colors">
         <Package className="w-5 h-5 text-gold-400" /> Catalog Manager
+      </Link>
+      <Link onClick={() => setMobileMenuOpen(false)} to="/admin/categories" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-navy-800 transition-colors">
+        <Layers className="w-5 h-5 text-gold-400" /> Categories
       </Link>
       <Link onClick={() => setMobileMenuOpen(false)} to="/admin/reviews" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-navy-800 transition-colors">
         <MessageSquare className="w-5 h-5 text-gold-400" /> Reviews

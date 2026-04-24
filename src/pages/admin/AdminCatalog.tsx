@@ -4,6 +4,7 @@ import { Loader2, Plus, Edit, Trash2, EyeOff, X, AlertCircle, Image as ImageIcon
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../../hooks/useAuth";
 import { logAdminAction } from "../../lib/audit";
+import { fetchCategories, fetchSubcategories, Category, Subcategory } from "../../lib/categories";
 
 export default function AdminCatalog() {
   const { user } = useAuth();
@@ -21,8 +22,13 @@ export default function AdminCatalog() {
   const [isDragActive, setIsDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Category/Subcategory from DB
+  const [dbCategories, setDbCategories] = useState<Category[]>([]);
+  const [dbSubcategories, setDbSubcategories] = useState<Subcategory[]>([]);
+
   useEffect(() => {
     fetchProducts();
+    fetchCategories().then(setDbCategories);
   }, []);
 
   async function fetchProducts() {
@@ -43,6 +49,12 @@ export default function AdminCatalog() {
     setCurrentProduct(p);
     setFormErrors({});
     setIsEditing(true);
+    // Load subcategories for existing product's category
+    if (p.category) {
+      const cat = dbCategories.find(c => c.name === p.category);
+      if (cat) fetchSubcategories(cat.id).then(setDbSubcategories);
+      else setDbSubcategories([]);
+    }
   };
 
   const handleAdd = () => {
@@ -55,11 +67,13 @@ export default function AdminCatalog() {
       goldKarat: "22K",
       images: [],
       popularityScore: 0,
-      category: "Bangle",
+      category: dbCategories[0]?.name ?? "",
+      subCategory: "",
       isHidden: false,
       isOutofStock: false,
       stockQuantity: 0
     });
+    setDbSubcategories([]);
     setFormErrors({});
     setIsEditing(true);
   };
@@ -330,13 +344,44 @@ export default function AdminCatalog() {
                          <label className="block text-[10px] uppercase font-bold tracking-widest text-white/60 mb-2">Category</label>
                          <select
                            value={currentProduct.category}
-                           onChange={e => setCurrentProduct({...currentProduct, category: e.target.value})}
+                           onChange={async e => {
+                             const catName = e.target.value;
+                             setCurrentProduct({...currentProduct, category: catName, subCategory: ''});
+                             const cat = dbCategories.find(c => c.name === catName);
+                             if (cat) {
+                               const subs = await fetchSubcategories(cat.id);
+                               setDbSubcategories(subs);
+                             } else {
+                               setDbSubcategories([]);
+                             }
+                           }}
                            className={selectClass()}
                          >
-                           {['Bangle', 'Ring', 'Necklace', 'Earring', 'Chain', 'Pendant'].map(c => (
-                             <option key={c} value={c}>{c}</option>
+                           {dbCategories.length === 0 && (
+                             <option value="">No categories — add in Category Manager</option>
+                           )}
+                           {dbCategories.map(c => (
+                             <option key={c.id} value={c.name}>{c.name}</option>
                            ))}
                          </select>
+                      </div>
+
+                      <div>
+                         <label className="block text-[10px] uppercase font-bold tracking-widest text-white/60 mb-2">Subcategory</label>
+                         <select
+                           value={currentProduct.subCategory || ''}
+                           onChange={e => setCurrentProduct({...currentProduct, subCategory: e.target.value})}
+                           className={selectClass()}
+                           disabled={dbSubcategories.length === 0}
+                         >
+                           <option value="">— None / All —</option>
+                           {dbSubcategories.map(s => (
+                             <option key={s.id} value={s.name}>{s.name}</option>
+                           ))}
+                         </select>
+                         {dbSubcategories.length === 0 && currentProduct.category && (
+                           <p className="text-[10px] text-gray-500 mt-1">No subcategories for this category yet.</p>
+                         )}
                       </div>
 
                       <div>
