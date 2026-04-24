@@ -41,10 +41,13 @@ export function Footer() {
               <img
                 src={footerLogo}
                 alt="NABA Logo"
-                className="h-50 w-auto object-contain"
+                className="h-20 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
-              <span className="font-serif font-bold text-3xl tracking-tighter text-white">NABA</span>
+              <div className="flex flex-col leading-none">
+                <span className="font-serif font-bold text-3xl tracking-tighter text-white">NABA</span>
+                <span className="text-[11px] uppercase tracking-[3px] text-gold-400/70 font-bold mt-0.5">Since 1992</span>
+              </div>
             </Link>
             <p className="text-gray-400 text-xs leading-relaxed max-w-sm mb-6">
               Integrity and compliance are at the core of our business. We strictly adhere to all legal and taxation standards, maintaining complete transparency in every process.
