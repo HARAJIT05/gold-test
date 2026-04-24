@@ -14,6 +14,7 @@ export interface HeroSlide {
 
 export interface HomeConfig {
   heroSlides?: HeroSlide[];
+  tickerText?: string;
 }
 
 const defaultSlides: HeroSlide[] = [

@@ -1,19 +1,17 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { supabase } from "../../lib/supabase";
-import { Loader2, TrendingUp, Save, UploadCloud } from "lucide-react";
+import { Loader2, Save, UploadCloud } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { useGoldRate, HeroSlide } from "../../hooks/useGoldRate";
-
+import { HeroSlide } from "../../hooks/useGoldRate";
 import { logAdminAction } from "../../lib/audit";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [rates, setRates] = useState({ 
-    rate22k: 0, 
-    rate24k: 0,
-    logoUrl: "", 
+  const [rates, setRates] = useState({
+    logoUrl: "",
     homeConfig: {
-      heroSlides: [] as HeroSlide[]
+      heroSlides: [] as HeroSlide[],
+      tickerText: "",
     }
   });
   const [loading, setLoading] = useState(true);
@@ -31,11 +29,12 @@ export default function AdminDashboard() {
           .single();
           
         if (data) {
-          setRates({ 
-             rate22k: data.rate22k || 0, 
-             rate24k: data.rate24k || 0,
-             logoUrl: data.logoUrl || "",
-             homeConfig: data.homeConfig || { heroSlides: [] }
+          setRates({
+            logoUrl: data.logoUrl || "",
+            homeConfig: {
+              heroSlides: data.homeConfig?.heroSlides || [],
+              tickerText: data.homeConfig?.tickerText || "",
+            }
           });
         }
       } catch (err) {
@@ -55,8 +54,6 @@ export default function AdminDashboard() {
         .from('settings')
         .upsert({
           id: 'goldRate',
-          rate22k: Number(rates.rate22k),
-          rate24k: Number(rates.rate24k),
           logoUrl: rates.logoUrl,
           homeConfig: rates.homeConfig,
           lastUpdated: Date.now()
@@ -65,11 +62,11 @@ export default function AdminDashboard() {
       if (error) throw error;
       
       if (user?.email) {
-         await logAdminAction(
-            user.email,
-            'UPDATE_SETTINGS',
-            `Updated global settings. 22K: ₹${rates.rate22k}`
-         );
+        await logAdminAction(
+          user.email,
+          'UPDATE_SETTINGS',
+          `Updated global settings.`
+        );
       }
 
       setMsg({ text: "Settings updated successfully!", type: "success" });
@@ -196,8 +193,7 @@ export default function AdminDashboard() {
       <div className="bg-navy-900 p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold flex items-center gap-2 text-white">
-            <TrendingUp className="text-gold-500 w-5 h-5" /> 
-            Global Settings & Rates Editor
+            Global Settings Editor
           </h2>
           {msg.text && (
             <span className={`text-sm px-3 py-1 rounded font-medium ${msg.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -210,32 +206,22 @@ export default function AdminDashboard() {
            <div className="flex py-10"><Loader2 className="w-8 h-8 animate-spin text-gold-500 mx-auto" /></div>
         ) : (
           <div className="space-y-6">
-            <div className="grid sm:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">22 Karat (per gram)</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium font-mono">₹</span>
-                  <input 
-                    type="number"
-                    value={rates.rate22k || ""}
-                    onChange={(e) => setRates({...rates, rate22k: Number(e.target.value) || 0})}
-                    className="w-full pl-8 pr-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400 font-mono text-lg"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">24 Karat (per gram)</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium font-mono">₹</span>
-                  <input 
-                    type="number"
-                    value={rates.rate24k || ""}
-                    onChange={(e) => setRates({...rates, rate24k: Number(e.target.value) || 0})}
-                    className="w-full pl-8 pr-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400 font-mono text-lg"
-                  />
-                </div>
-              </div>
+            {/* Ticker text */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Top Scrolling Ticker Text</label>
+              <input
+                type="text"
+                value={rates.homeConfig.tickerText || ""}
+                onChange={(e) =>
+                  setRates(prev => ({
+                    ...prev,
+                    homeConfig: { ...prev.homeConfig, tickerText: e.target.value }
+                  }))
+                }
+                placeholder="e.g. Welcome to NABA Gold Karigar · Est. 1992"
+                className="w-full px-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400 text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">This text scrolls across the top bar of the website. Leave blank to use the default message.</p>
             </div>
 
             <div className="border-t border-gray-100 pt-6">
