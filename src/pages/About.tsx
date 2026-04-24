@@ -34,7 +34,7 @@ export default function About() {
               />
             </div>
             <div className="pl-0 md:pl-8">
-              <h3 className="text-3xl font-serif text-white mb-6 leading-tight">The Karigar's Mark</h3>
+              <h3 className="text-3xl font-serif text-white mb-6 leading-tight">Excellence in Craftsmanship</h3>
               <p className="mb-6 text-sm leading-relaxed text-gray-400">
                 At our state-of-the-art manufacturing facility, a team of 100+ skilled goldsmiths
                 meticulously crafts 22K gold, ensuring exceptional quality, purity, and attention to
@@ -49,7 +49,7 @@ export default function About() {
 
           <div className="my-24 grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1 pr-0 md:pr-8">
-              <h3 className="text-3xl font-serif text-white mb-6 leading-tight">Purity Guarantee</h3>
+              <h3 className="text-3xl font-serif text-white mb-6 leading-tight">Crafted with Purity</h3>
               <p className="mb-6 text-sm leading-relaxed text-gray-400">
                 Guided by our core values of trust, superior quality, and reliable service, we
                 continue to stand as a dependable and long-term business partner in the world of
@@ -60,10 +60,9 @@ export default function About() {
             <div className="relative order-1 md:order-2">
               <div className="absolute inset-0 bg-gold-400/10 rounded-2xl rotate-3 transform origin-bottom-right"></div>
               <img
-                src="https://picsum.photos/seed/purity/800/600"
-                alt="Purity Testing"
-                className="relative rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.3)] border-[8px] border-navy-900 z-10 w-full"
-                referrerPolicy="no-referrer"
+                src="/purity.png"
+                alt="Redlands EDX 3000 – Gold Purity Spectrometer"
+                className="relative rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.3)] border-[8px] border-navy-900 z-10 w-full object-contain bg-white"
               />
             </div>
           </div>
@@ -106,16 +105,18 @@ export default function About() {
               {/* Map */}
               <div className="relative h-64 md:h-72 bg-navy-800">
                 <iframe
-                  title="Naba Gold – Kalyan East"
+                  title="Naba Gold – Kalyan Branch"
                   width="100%"
                   height="100%"
                   frameBorder="0"
                   scrolling="no"
                   marginHeight={0}
                   marginWidth={0}
-                  src="https://maps.google.com/maps?width=100%&height=400&hl=en&q=Kalyan+East,+Thane,+Maharashtra&ie=UTF8&t=&z=15&iwloc=B&output=embed"
+                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1910221.2216378604!2d71.8260152!3d20.7548135!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be79500307049df%3A0x513619e07a148e3!2sRajguru%20niwas!5e0!3m2!1sen!2sin!4v1777052282068!5m2!1sen!2sin"
                   style={{ filter: 'grayscale(0.7) contrast(1.1) brightness(0.75)', display: 'block' }}
                   className="absolute inset-0 w-full h-full"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
                   allowFullScreen
                 />
                 {/* Gradient fade at bottom */}
@@ -129,30 +130,37 @@ export default function About() {
               {/* Info */}
               <div className="p-6 flex flex-col gap-4">
                 <div>
-                  <h3 className="font-serif text-xl text-white font-bold mb-1">Kalyan East Showroom</h3>
-                  <p className="text-[10px] uppercase tracking-widest text-gold-400 font-bold">Main Branch · Est. 1992</p>
+                  <h3 className="font-serif text-xl text-white font-bold mb-1">Kalyan Branch</h3>
+                  <p className="text-[10px] uppercase tracking-widest text-gold-400 font-bold">Main Branch</p>
                 </div>
                 <div className="h-[1px] bg-white/5" />
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1">Address</p>
                     <p className="text-gray-400 text-xs leading-relaxed">
-                      Shop No. 12, Kalyan East,<br />
-                      Thane District,<br />
-                      Maharashtra – 421 306
+                      Rajguru Niwas, Room No 4,<br />
+                      Jijamata Colony, Narayanwadi,<br />
+                      Kalyan (West), Pin – 421301
                     </p>
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1">Contact</p>
-                    <a href="tel:+919330340211" className="text-gold-400 text-xs font-bold hover:text-gold-300 transition-colors block">
+                    <a href="tel:+919892242785" className="text-gold-400 text-xs font-bold hover:text-gold-300 transition-colors block">
+                      +91 98922 42785
+                    </a>
+                    <a href="tel:+919932281366" className="text-gold-400 text-xs font-bold hover:text-gold-300 transition-colors block">
                       +91 93303 40211
                     </a>
                     <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1 mt-3">Hours</p>
-                    <p className="text-gray-400 text-xs">Mon – Sat: 10am – 8pm<br />Sun: 11am – 6pm</p>
+                    <p className="text-gray-400 text-xs leading-relaxed">
+                      10:00 am – 3:00 pm<br />
+                      4:00 pm – 10:00 pm<br />
+                      <span className="text-white/30">Tuesday: 10:00 am – 3:00 pm only</span>
+                    </p>
                   </div>
                 </div>
                 <a
-                  href="https://maps.google.com/?q=Kalyan+East,Thane,Maharashtra"
+                  href="https://maps.app.goo.gl/1K3iToLCCEd5mMD16"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-navy-950 bg-gold-400 hover:bg-gold-500 transition-colors px-5 py-2.5 rounded-full w-fit"
@@ -173,16 +181,18 @@ export default function About() {
               {/* Map */}
               <div className="relative h-64 md:h-72 bg-navy-800">
                 <iframe
-                  title="Naba Gold – Kalyan West"
+                  title="Naba Gold – Mumbai Branch"
                   width="100%"
                   height="100%"
                   frameBorder="0"
                   scrolling="no"
                   marginHeight={0}
                   marginWidth={0}
-                  src="https://maps.google.com/maps?width=100%&height=400&hl=en&q=Kalyan+West,+Thane,+Maharashtra&ie=UTF8&t=&z=15&iwloc=B&output=embed"
+                  src="https://maps.google.com/maps?width=100%&height=400&hl=en&q=307+OM+Golden+Building+Shaikh+Memon+Street+Kalbadevi+Mumbai+400002&ie=UTF8&t=&z=16&iwloc=B&output=embed"
                   style={{ filter: 'grayscale(0.7) contrast(1.1) brightness(0.75)', display: 'block' }}
                   className="absolute inset-0 w-full h-full"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
                   allowFullScreen
                 />
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-navy-900 via-transparent to-transparent" />
@@ -194,7 +204,7 @@ export default function About() {
               {/* Info */}
               <div className="p-6 flex flex-col gap-4">
                 <div>
-                  <h3 className="font-serif text-xl text-white font-bold mb-1">Kalyan West Showroom</h3>
+                  <h3 className="font-serif text-xl text-white font-bold mb-1">Mumbai Branch </h3>
                   <p className="text-[10px] uppercase tracking-widest text-gold-400 font-bold">Second Branch</p>
                 </div>
                 <div className="h-[1px] bg-white/5" />
@@ -202,22 +212,29 @@ export default function About() {
                   <div>
                     <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1">Address</p>
                     <p className="text-gray-400 text-xs leading-relaxed">
-                      Shop No. 8, Kalyan West,<br />
-                      Thane District,<br />
-                      Maharashtra – 421 301
+                      307, OM Golden Building,<br />
+                      Shaikh Memon Street,<br />
+                      Kalbadevi, Mumbai – 400002
                     </p>
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1">Contact</p>
-                    <a href="tel:+919330340211" className="text-gold-400 text-xs font-bold hover:text-gold-300 transition-colors block">
-                      +91 93303 40211
+                    <a href="tel:+919892242785" className="text-gold-400 text-xs font-bold hover:text-gold-300 transition-colors block">
+                      +91 98922 42785
+                    </a>
+                    <a href="tel:+919932281366" className="text-gold-400 text-xs font-bold hover:text-gold-300 transition-colors block">
+                      +91 99322 81366
                     </a>
                     <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1 mt-3">Hours</p>
-                    <p className="text-gray-400 text-xs">Mon – Sat: 10am – 8pm<br />Sun: 11am – 6pm</p>
+                    <p className="text-gray-400 text-xs leading-relaxed">
+                      10:00 am – 3:00 pm<br />
+                      4:00 pm – 10:00 pm<br />
+                      <span className="text-white/30">Tuesday: 10:00 am – 3:00 pm only</span>
+                    </p>
                   </div>
                 </div>
                 <a
-                  href="https://maps.google.com/?q=Kalyan+West,Thane,Maharashtra"
+                  href="https://www.google.com/maps/search/?api=1&query=307+OM+Golden+Building+Shaikh+Memon+Street+Kalbadevi+Mumbai"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-navy-950 bg-gold-400 hover:bg-gold-500 transition-colors px-5 py-2.5 rounded-full w-fit"
