@@ -107,7 +107,7 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
         className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
       >
         <div
-          className="relative w-full max-w-4xl max-h-[90vh] bg-navy-900 rounded-3xl shadow-2xl border border-white/10 overflow-hidden flex flex-col pointer-events-auto"
+          className="relative w-full max-w-4xl max-h-[90vh] bg-navy-900 rounded-3xl shadow-2xl border border-white/10 overflow-y-auto md:overflow-hidden flex flex-col pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
@@ -118,11 +118,11 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
             <X className="w-4 h-4" />
           </button>
 
-          <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+          <div className="flex flex-col md:flex-row md:flex-1 md:overflow-hidden">
             {/* ── LEFT: Image Gallery ── */}
             <div className="md:w-1/2 flex flex-col bg-navy-950">
               {/* Main image */}
-              <div className="flex-1 relative min-h-[260px] md:min-h-0">
+              <div className="relative h-52 md:h-auto md:flex-1">
                 {images.length > 0 ? (
                   <div
                     className="w-full h-full cursor-zoom-in overflow-hidden relative"
