@@ -58,6 +58,7 @@ export default function AdminCatalog() {
   };
 
   const handleAdd = () => {
+    const defaultCat = dbCategories[0];
     setCurrentProduct({
       title: "",
       description: "",
@@ -67,13 +68,19 @@ export default function AdminCatalog() {
       goldKarat: "22K",
       images: [],
       popularityScore: 0,
-      category: dbCategories[0]?.name ?? "",
+      category: defaultCat?.name ?? "",
       subCategory: "",
       isHidden: false,
       isOutofStock: false,
       stockQuantity: 0
     });
-    setDbSubcategories([]);
+    
+    if (defaultCat) {
+      fetchSubcategories(defaultCat.id).then(setDbSubcategories);
+    } else {
+      setDbSubcategories([]);
+    }
+    
     setFormErrors({});
     setIsEditing(true);
   };

@@ -212,6 +212,15 @@ export default function Home() {
                 const accentA = is22k ? 'rgba(212,160,23,0.12)' : 'rgba(255,215,100,0.10)';
                 const accentB = is22k ? 'rgba(180,130,10,0.06)' : 'rgba(240,200,80,0.07)';
 
+                // Determine the correct updated time
+                let displayDate: Date | null = null;
+                if (isOverride && rate.adminLastUpdated) {
+                  displayDate = new Date(rate.adminLastUpdated);
+                } else if (!isOverride && rate.liveRateInfo?.fetchedAt) {
+                  displayDate = rate.liveRateInfo.fetchedAt;
+                }
+                const displayDateStr = displayDate ? displayDate.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '';
+
                 return (
                   <>
                     {/* ── Background ── */}
@@ -296,7 +305,17 @@ export default function Home() {
                                 )}
                               </span>
                             </div>
-                            <p className="text-xs text-white/30 uppercase tracking-widest mt-1.5 pl-1">per gram · Indian Rupee</p>
+                            <p className="text-xs text-white/30 uppercase tracking-widest mt-1.5 pl-1 flex items-center flex-wrap gap-2">
+                              <span>per gram · Indian Rupee</span>
+                              {displayDateStr && (
+                                <>
+                                  <span className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
+                                  <span className="text-white/40 font-mono tracking-normal normal-case">
+                                    Updated: {displayDateStr}
+                                  </span>
+                                </>
+                              )}
+                            </p>
                           </div>
 
                           {/* Gold divider */}
@@ -372,6 +391,15 @@ export default function Home() {
                                   <span className="text-[10px] uppercase tracking-widest text-white/30">Standard</span>
                                   <span className="text-[10px] font-bold text-white/50">BIS Hallmarked</span>
                                 </div>
+
+                                {displayDateStr && (
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-[10px] uppercase tracking-widest text-white/30">Updated</span>
+                                    <span className="text-[10px] font-bold text-white/50 font-mono">
+                                      {displayDateStr}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
 
                               {/* Bottom accent bar */}

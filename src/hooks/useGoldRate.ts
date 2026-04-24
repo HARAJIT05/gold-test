@@ -68,6 +68,8 @@ export interface GoldRateState {
   /** The rate manually set by the admin in Supabase (0 = not overridden). */
   adminRate22k: number;
   adminRate24k: number;
+  /** Timestamp of the last admin update. */
+  adminLastUpdated: number;
   /** True when admin override is active (adminRate22k > 0). */
   isAdminOverride: boolean;
   logoUrl: string;
@@ -87,6 +89,7 @@ export function useGoldRate() {
     marketRate24k: 0,
     adminRate22k: 0,
     adminRate24k: 0,
+    adminLastUpdated: 0,
     isAdminOverride: false,
     logoUrl: "",
     homeConfig: { heroSlides: defaultSlides },
@@ -113,6 +116,7 @@ export function useGoldRate() {
       const config = data?.homeConfig || {};
       const adminRate = data?.rate22k || 0;
       const adminRate24k = data?.rate24k || 0;
+      const adminLastUpdated = data?.lastUpdated || 0;
       const marketRate = liveRate?.rate22k || 0;
       const marketRate24 = liveRate?.rate24k || 0;
 
@@ -123,6 +127,7 @@ export function useGoldRate() {
         marketRate24k: marketRate24,
         adminRate22k: adminRate,
         adminRate24k: adminRate24k,
+        adminLastUpdated,
         isAdminOverride: adminRate > 0 || adminRate24k > 0,
         logoUrl: data?.logoUrl || "",
         homeConfig: { ...config, heroSlides: config.heroSlides || defaultSlides },
@@ -162,10 +167,12 @@ export function useGoldRate() {
             const config = newData.homeConfig || {};
             const adminRate = newData.rate22k || 0;
             const adminRate24k = newData.rate24k || 0;
+            const adminLastUpdated = newData.lastUpdated || 0;
             setRate(prev => ({
               ...prev,
               adminRate22k: adminRate,
               adminRate24k: adminRate24k,
+              adminLastUpdated,
               isAdminOverride: adminRate > 0 || adminRate24k > 0,
               rate22k: adminRate > 0 ? adminRate : prev.marketRate22k,
               rate24k: adminRate24k > 0 ? adminRate24k : prev.marketRate24k,
