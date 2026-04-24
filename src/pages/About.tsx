@@ -149,7 +149,7 @@ export default function About() {
                       +91 98922 42785
                     </a>
                     <a href="tel:+919932281366" className="text-gold-400 text-xs font-bold hover:text-gold-300 transition-colors block">
-                      +91 93303 40211
+                      +91 99322 81366
                     </a>
                     <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1 mt-3">Hours</p>
                     <p className="text-gray-400 text-xs leading-relaxed">

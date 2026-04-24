@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../lib/supabase";
-import { Loader2, Plus, Edit, Trash2, EyeOff, X, AlertCircle, Image as ImageIcon, UploadCloud } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, EyeOff, X, AlertCircle, Image as ImageIcon, UploadCloud, Link } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../../hooks/useAuth";
 import { logAdminAction } from "../../lib/audit";
@@ -21,6 +21,8 @@ export default function AdminCatalog() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [imageUrlError, setImageUrlError] = useState("");
 
   // Category/Subcategory from DB
   const [dbCategories, setDbCategories] = useState<Category[]>([]);
@@ -104,7 +106,6 @@ export default function AdminCatalog() {
   const validateForm = () => {
     const errors: Record<string, string> = {};
     if (!currentProduct.title?.trim()) errors.title = "Title is required";
-    if (!currentProduct.description?.trim()) errors.description = "Description is required";
     if (!currentProduct.weightInGrams || currentProduct.weightInGrams <= 0) errors.weightInGrams = "Valid weight is required";
     if (currentProduct.makingCharge === "" || currentProduct.makingCharge < 0) errors.makingCharge = "Valid making charge is required";
     setFormErrors(errors);
@@ -227,17 +228,65 @@ export default function AdminCatalog() {
 
   return (
     <div className="relative">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-serif font-bold text-white">Catalog Manager</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">Catalog Manager</h1>
         <button 
           onClick={handleAdd}
-          className="flex items-center gap-2 bg-navy-900 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-navy-900 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors shadow-sm self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" /> Add Item
         </button>
       </div>
 
-      <div className="bg-navy-900 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.02)] border border-black/5 overflow-hidden">
+      {/* ── Mobile card list (hidden on md+) ── */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gold-400" /></div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-16 text-gray-400 font-serif bg-navy-900 rounded-2xl border border-black/5 p-8">No items in the catalog.</div>
+        ) : (
+          products.map((p) => (
+            <div key={p.id} className="bg-navy-900 rounded-2xl border border-white/5 p-4 flex items-start gap-4">
+              {/* Thumbnail */}
+              <div className="w-14 h-14 rounded-xl bg-navy-800 overflow-hidden shrink-0 border border-white/10 flex items-center justify-center">
+                {p.images && p.images[0] ? (
+                  <img src={p.images[0]} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  <ImageIcon className="w-5 h-5 text-gray-500" />
+                )}
+              </div>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="font-serif font-semibold text-white text-sm truncate">{p.title}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{p.category}{p.subCategory ? ` · ${p.subCategory}` : ''}</p>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-xs text-gray-400">
+                  <span>{p.weightInGrams}g</span>
+                  <span>{p.chargeType === 'flat' ? `₹${p.makingCharge}` : `${p.makingCharge}%`} making</span>
+                  <span>Qty: {p.stockQuantity || 0}</span>
+                </div>
+                {/* Status badges */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {p.isHidden && <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full"><EyeOff className="w-3 h-3"/>Hidden</span>}
+                  {p.isOutofStock && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-amber-900/50 border border-amber-600/30 text-amber-400 px-2 py-0.5 rounded-full">Out of Stock</span>}
+                  {!p.isHidden && !p.isOutofStock && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-emerald-900/50 border border-emerald-600/30 text-emerald-400 px-2 py-0.5 rounded-full">Active</span>}
+                </div>
+              </div>
+              {/* Actions */}
+              <div className="flex flex-col gap-2 shrink-0">
+                <button onClick={() => handleEdit(p)} className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors">
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button onClick={() => handleDelete(p.id, p.title)} className="p-2 text-rose-400 hover:bg-rose-400/10 rounded-lg transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ── Desktop table (hidden on mobile) ── */}
+      <div className="hidden md:block bg-navy-900 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.02)] border border-black/5 overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-navy-800 border-b border-gray-100/50 uppercase text-[10px] text-gray-400 font-bold tracking-widest">
@@ -276,7 +325,7 @@ export default function AdminCatalog() {
                   <td className="p-5 text-sm font-medium text-white">{p.stockQuantity || 0}</td>
                   <td className="p-5">
                     <div className="flex gap-2">
-                       {p.isHidden && <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold bg-gray-100 text-gray-500 px-2 py-1 rounded-full"><EyeOff className="w-3 h-3"/> Hidden</span>}
+                       {p.isHidden && <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold bg-gray-100 text-gray-500 px-2 py-1 rounded-full"><EyeOff className="w-3 h-3"/>Hidden</span>}
                        {p.isOutofStock && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-amber-50 border border-amber-200/50 text-amber-700 px-2 py-1 rounded-full">Out of Stock</span>}
                        {!p.isHidden && !p.isOutofStock && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-emerald-50 border border-emerald-200/50 text-emerald-700 px-2 py-1 rounded-full">Active</span>}
                     </div>
@@ -403,7 +452,7 @@ export default function AdminCatalog() {
                       </div>
 
                       <div className="sm:col-span-2">
-                         <label className="block text-[10px] uppercase font-bold tracking-widest text-white/60 mb-2">Description</label>
+                         <label className="block text-[10px] uppercase font-bold tracking-widest text-white/60 mb-2">Description <span className="normal-case text-white/30 tracking-normal">(optional)</span></label>
                          <textarea 
                            value={currentProduct.description} 
                            onChange={e => setCurrentProduct({...currentProduct, description: e.target.value})} 
@@ -527,6 +576,47 @@ export default function AdminCatalog() {
                            ))}
                         </div>
                       )}
+                      {/* URL Input */}
+                      <div className="mt-4">
+                        <p className="text-[10px] uppercase font-bold tracking-widest text-white/60 mb-2">Or add via image URL</p>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+                            <input
+                              type="url"
+                              value={imageUrlInput}
+                              onChange={e => { setImageUrlInput(e.target.value); setImageUrlError(""); }}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const url = imageUrlInput.trim();
+                                  if (!url) return;
+                                  try { new URL(url); } catch { setImageUrlError("Please enter a valid URL."); return; }
+                                  setCurrentProduct((prev: any) => ({ ...prev, images: [...(prev.images || []), url] }));
+                                  setImageUrlInput("");
+                                }
+                              }}
+                              placeholder="https://example.com/image.jpg"
+                              className="w-full pl-9 pr-4 py-2.5 bg-navy-800 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-gold-400 transition-colors"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const url = imageUrlInput.trim();
+                              if (!url) return;
+                              try { new URL(url); } catch { setImageUrlError("Please enter a valid URL."); return; }
+                              setCurrentProduct((prev: any) => ({ ...prev, images: [...(prev.images || []), url] }));
+                              setImageUrlInput("");
+                              setImageUrlError("");
+                            }}
+                            className="px-4 py-2.5 bg-gold-400 hover:bg-gold-500 text-navy-950 text-xs font-bold uppercase tracking-widest rounded-xl transition-colors whitespace-nowrap"
+                          >
+                            Add
+                          </button>
+                        </div>
+                        {imageUrlError && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{imageUrlError}</p>}
+                      </div>
                     </div>
                   </fieldset>
 

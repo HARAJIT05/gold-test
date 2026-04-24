@@ -162,20 +162,20 @@ export default function AdminCategories() {
   // ── Render ─────────────────────────────────────────────
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-white">Category Manager</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">Category Manager</h1>
           <p className="text-gray-500 text-sm mt-1">Manage categories and subcategories for your catalog</p>
         </div>
         <button
           onClick={() => openAdd('category')}
-          className="flex items-center gap-2 bg-gold-400 hover:bg-gold-500 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors"
+          className="flex items-center gap-2 bg-gold-400 hover:bg-gold-500 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" /> New Category
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* ── Left: Categories ── */}
         <div className="bg-navy-900 rounded-2xl border border-white/5 overflow-hidden">
           <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
@@ -211,12 +211,12 @@ export default function AdminCategories() {
                     <p className="font-semibold text-white text-sm truncate">{cat.name}</p>
                     <p className="text-[10px] text-gray-500 font-mono">{cat.slug}</p>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => openEdit('category', cat)} className="p-1.5 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors">
-                      <Edit className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => openEdit('category', cat)} className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors">
+                      <Edit className="w-4 h-4" />
                     </button>
-                    <button onClick={() => deleteCategory(cat)} className="p-1.5 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
+                    <button onClick={() => deleteCategory(cat)} className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                   <ChevronRight className={`w-4 h-4 text-gray-600 flex-shrink-0 transition-transform ${selectedCat?.id === cat.id ? 'text-gold-400 rotate-90' : ''}`} />
@@ -228,10 +228,10 @@ export default function AdminCategories() {
 
         {/* ── Right: Subcategories ── */}
         <div className="bg-navy-900 rounded-2xl border border-white/5 overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-gold-400" />
-              <h2 className="font-bold text-white text-sm uppercase tracking-widest">
+          <div className="px-4 sm:px-6 py-4 border-b border-white/5 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Tag className="w-4 h-4 text-gold-400 flex-shrink-0" />
+              <h2 className="font-bold text-white text-xs sm:text-sm uppercase tracking-widest truncate">
                 {selectedCat ? `${selectedCat.name} → Subcategories` : 'Subcategories'}
               </h2>
             </div>
@@ -268,12 +268,12 @@ export default function AdminCategories() {
                     <p className="font-semibold text-white text-sm truncate">{sub.name}</p>
                     <p className="text-[10px] text-gray-500 font-mono">{sub.slug}</p>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => openEdit('subcategory', sub, selectedCat)} className="p-1.5 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors">
-                      <Edit className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => openEdit('subcategory', sub, selectedCat)} className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors">
+                      <Edit className="w-4 h-4" />
                     </button>
-                    <button onClick={() => deleteSubcategory(sub)} className="p-1.5 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
+                    <button onClick={() => deleteSubcategory(sub)} className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </li>
