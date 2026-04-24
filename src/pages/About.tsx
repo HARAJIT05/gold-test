@@ -38,7 +38,7 @@ export default function About() {
               <p className="mb-6 text-sm leading-relaxed text-gray-400">
                 At our state-of-the-art manufacturing facility, a team of 100+ skilled goldsmiths
                 meticulously crafts 22K gold, ensuring exceptional quality, purity, and attention to
-                detail in every creation.              </p>
+                detail in every creation.</p>
               <p className="text-sm leading-relaxed text-gray-400">
                 In addition to our exclusive range of ready designs, we also offer bespoke gold
                 manufacturing services tailored to meet our clients' unique requirements. Every
