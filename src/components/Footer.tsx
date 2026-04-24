@@ -27,7 +27,6 @@ export function Footer() {
   const { rate } = useGoldRate();
 
   const footerLogo = rate.homeConfig?.footerLogoUrl || rate.logoUrl || '/naba-logo.png';
-  const trustedClients = rate.homeConfig?.trustedClients ?? [];
 
   return (
     <footer className="bg-navy-950 text-white border-t border-white/5">
@@ -42,18 +41,15 @@ export function Footer() {
               <img
                 src={footerLogo}
                 alt="NABA Logo"
-                className="h-14 w-auto object-contain"
+                className="h-50 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
-              <div className="flex flex-col leading-none">
-                <span className="font-serif font-bold text-3xl tracking-tighter text-white">NABA</span>
-                <span className="text-[9px] uppercase tracking-[3px] text-gold-400/70 font-bold mt-0.5">Since 1992</span>
-              </div>
+              <span className="font-serif font-bold text-3xl tracking-tighter text-white">NABA</span>
             </Link>
-            <p className="text-gray-400 text-xs leading-relaxed max-w-sm mb-6 font-bold">
+            <p className="text-gray-400 text-xs leading-relaxed max-w-sm mb-6">
               Integrity and compliance are at the core of our business. We strictly adhere to all legal and taxation standards, maintaining complete transparency in every process.
               Our GST registration reflects our commitment to responsible and trustworthy operations.
-              <span className="block mt-2 font-mono font-bold text-gold-400/80 tracking-wider">GSTIN: 27AOQPS7242N1ZZ</span>
+              <span className="block mt-3 font-mono font-bold text-base text-gold-400 tracking-wider">GSTIN:27AOQPS7242N1ZZ</span>
             </p>
 
             {/* ── Social Icons ── */}
@@ -162,8 +158,8 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-[10px] uppercase tracking-widest text-gray-500 flex flex-col md:flex-row justify-between items-center">
           <p>&copy; {new Date().getFullYear()} NABA. All rights reserved.</p>
           <div className="mt-4 md:mt-0 space-x-6 font-bold">
-            <Link to="#" className="hover:text-gold-400 text-gray-500 transition-colors">Privacy Policy</Link>
-            <Link to="#" className="hover:text-gold-400 text-gray-500 transition-colors">Terms</Link>
+            <Link to="/privacy-policy" className="hover:text-gold-400 text-gray-500 transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-gold-400 text-gray-500 transition-colors">Terms</Link>
           </div>
         </div>
       </div>

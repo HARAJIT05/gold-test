@@ -10,6 +10,8 @@ import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
 import Reviews from "./pages/Reviews";
 import About from "./pages/About";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -25,6 +27,8 @@ export default function App() {
         <Route path="catalog" element={<Catalog />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="about" element={<About />} />
+        <Route path="privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="terms" element={<TermsAndConditions />} />
       </Route>
 
       <Route path="admin/login" element={<AdminLogin />} />
