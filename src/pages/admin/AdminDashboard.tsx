@@ -2,7 +2,7 @@ import { useState, useEffect, ChangeEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { Loader2, Save, UploadCloud } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { HeroSlide, GoldRateSlideConfig, DEFAULT_GOLD_SLIDE_CONFIG } from "../../hooks/useGoldRate";
+import { HeroSlide, GoldRateSlideConfig, DEFAULT_GOLD_SLIDE_CONFIG, TrustedClient } from "../../hooks/useGoldRate";
 import { logAdminAction } from "../../lib/audit";
 
 export default function AdminDashboard() {
@@ -16,6 +16,8 @@ export default function AdminDashboard() {
       heroImage: "",
       tickerText: "",
       goldRateSlides: { ...DEFAULT_GOLD_SLIDE_CONFIG } as GoldRateSlideConfig,
+      footerLogoUrl: "",
+      trustedClients: [] as TrustedClient[],
     }
   });
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,8 @@ export default function AdminDashboard() {
               heroImage: data.homeConfig?.heroImage || "",
               tickerText: data.homeConfig?.tickerText || "",
               goldRateSlides: { ...DEFAULT_GOLD_SLIDE_CONFIG, ...(data.homeConfig?.goldRateSlides || {}) },
+              footerLogoUrl: data.homeConfig?.footerLogoUrl || "",
+              trustedClients: data.homeConfig?.trustedClients || [],
             }
           });
         }
@@ -464,6 +468,149 @@ export default function AdminDashboard() {
                 )}
               </div>
               <p className="text-xs text-gray-500 mt-3">Provide a direct URL or upload an image securely to Supabase. Note: Requires a public 'assets' bucket. Leave blank to use the default 'GK' badge.</p>
+            </div>
+
+            {/* Footer Logo */}
+            <div className="border-t border-white/10 pt-6">
+              <h3 className="font-bold text-lg text-white mb-1">Footer Logo</h3>
+              <p className="text-xs text-gray-400 mb-4">Separate logo shown in the footer. Leave blank to reuse the Navbar logo above.</p>
+              <div className="flex gap-4 items-start">
+                <div className="flex-1 space-y-3">
+                  <input
+                    type="text"
+                    value={rates.homeConfig.footerLogoUrl || ""}
+                    placeholder="https://example.com/footer-logo.png"
+                    onChange={(e) => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, footerLogoUrl: e.target.value } }))}
+                    className="w-full px-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 text-sm"
+                  />
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500 uppercase tracking-widest">or</span>
+                    <label className={`flex items-center gap-2 px-4 py-2 bg-navy-800 border border-white/10 rounded-md cursor-pointer hover:bg-navy-700 transition-colors text-sm font-medium text-gray-300 ${uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                      {uploadingLogo ? 'Uploading...' : 'Upload Image'}
+                      <input type="file" accept="image/*" className="hidden" disabled={uploadingLogo}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingLogo(true);
+                          setMsg({ text: "Uploading footer logo...", type: "" });
+                          try {
+                            const ext = file.name.split('.').pop();
+                            const path = `footer-logo-${Date.now()}.${ext}`;
+                            const { error: upErr } = await supabase.storage.from('assets').upload(path, file);
+                            if (upErr) throw upErr;
+                            const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(path);
+                            setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, footerLogoUrl: publicUrl } }));
+                            setMsg({ text: "Footer logo uploaded! Click 'Update System' to save.", type: "success" });
+                          } catch (err: any) {
+                            setMsg({ text: err.message || "Upload failed.", type: "error" });
+                          } finally {
+                            setUploadingLogo(false);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+                {rates.homeConfig.footerLogoUrl && (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-20 h-14 rounded-md bg-navy-900 border border-white/10 overflow-hidden flex-shrink-0 flex items-center justify-center p-1">
+                      <img src={rates.homeConfig.footerLogoUrl} alt="Footer logo preview" className="w-full h-full object-contain" />
+                    </div>
+                    <button onClick={() => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, footerLogoUrl: "" } }))} className="text-xs text-red-500 hover:text-red-400 font-medium">Remove</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Trusted Clients */}
+            <div className="border-t border-white/10 pt-6">
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="font-bold text-lg text-white">Our Trusted Clients</h3>
+                <button
+                  onClick={() => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, trustedClients: [...(prev.homeConfig.trustedClients || []), { name: "", image: "" }] } }))}
+                  className="text-xs bg-gold-400 hover:bg-gold-500 text-white px-3 py-1.5 rounded font-bold"
+                >
+                  + Add Client
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mb-4">Client logos shown in the footer. Each entry needs a name and an image URL or upload.</p>
+              <div className="space-y-3">
+                {(rates.homeConfig.trustedClients || []).map((client, i) => (
+                  <div key={i} className="flex gap-3 items-center bg-navy-800 rounded-xl p-3 border border-white/5">
+                    {/* Thumbnail */}
+                    <div className="w-14 h-14 rounded-lg bg-navy-900 border border-white/10 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                      {client.image
+                        ? <img src={client.image} alt={client.name} className="w-full h-full object-contain p-1" />
+                        : <span className="text-[9px] text-white/20 text-center">No image</span>
+                      }
+                    </div>
+                    {/* Fields */}
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={client.name}
+                        placeholder="Client name"
+                        onChange={(e) => {
+                          const updated = [...(rates.homeConfig.trustedClients || [])];
+                          updated[i] = { ...updated[i], name: e.target.value };
+                          setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, trustedClients: updated } }));
+                        }}
+                        className="bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white outline-none focus:ring-1 focus:ring-gold-400"
+                      />
+                      <input
+                        type="text"
+                        value={client.image}
+                        placeholder="Image URL"
+                        onChange={(e) => {
+                          const updated = [...(rates.homeConfig.trustedClients || [])];
+                          updated[i] = { ...updated[i], image: e.target.value };
+                          setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, trustedClients: updated } }));
+                        }}
+                        className="bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white outline-none focus:ring-1 focus:ring-gold-400"
+                      />
+                    </div>
+                    {/* Upload + Remove */}
+                    <div className="flex flex-col gap-1.5 shrink-0">
+                      <label className="cursor-pointer text-[10px] text-gold-400 hover:text-gold-300 font-bold uppercase tracking-wider">
+                        Upload
+                        <input type="file" accept="image/*" className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const ext = file.name.split('.').pop();
+                              const path = `client-${Date.now()}.${ext}`;
+                              const { error: upErr } = await supabase.storage.from('assets').upload(path, file);
+                              if (upErr) throw upErr;
+                              const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(path);
+                              const updated = [...(rates.homeConfig.trustedClients || [])];
+                              updated[i] = { ...updated[i], image: publicUrl };
+                              setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, trustedClients: updated } }));
+                            } catch (err: any) {
+                              alert(err.message || 'Upload failed');
+                            }
+                          }}
+                        />
+                      </label>
+                      <button
+                        onClick={() => {
+                          const updated = (rates.homeConfig.trustedClients || []).filter((_, idx) => idx !== i);
+                          setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, trustedClients: updated } }));
+                        }}
+                        className="text-[10px] text-red-500 hover:text-red-400 font-bold uppercase tracking-wider"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {(rates.homeConfig.trustedClients || []).length === 0 && (
+                  <div className="text-center py-6 text-gray-600 border border-dashed border-white/10 rounded-xl text-xs">
+                    No clients added yet. Click "+ Add Client" to get started.
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="border-t border-gray-100 pt-6">

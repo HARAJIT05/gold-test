@@ -30,11 +30,18 @@ export const DEFAULT_GOLD_SLIDE_CONFIG: GoldRateSlideConfig = {
   sub24k: 'Today\'s 24K gold rate, updated live from global markets.',
 };
 
+export interface TrustedClient {
+  name: string;
+  image: string;
+}
+
 export interface HomeConfig {
   heroSlides?: HeroSlide[];
   heroImage?: string;
   tickerText?: string;
   goldRateSlides?: GoldRateSlideConfig;
+  footerLogoUrl?: string;
+  trustedClients?: TrustedClient[];
 }
 
 const defaultSlides: HeroSlide[] = [

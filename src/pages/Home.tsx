@@ -168,7 +168,7 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="grid grid-cols-2 gap-4">
               {[
                 { icon: <Award className="w-5 h-5 text-gold-400" />, num: "30+", label: "Years of Craft" },
-                { icon: <Users className="w-5 h-5 text-gold-400" />, num: "150+", label: "Gold Smiths" },
+                { icon: <Users className="w-5 h-5 text-gold-400" />, num: "100+", label: "Gold Smiths" },
                 { icon: <Gem className="w-5 h-5 text-gold-400" />, num: "500+", label: "Unique Designs" },
                 { icon: <Shield className="w-5 h-5 text-gold-400" />, num: "100%", label: "Hallmarked Purity" },
               ].map(({ icon, num, label }) => (
@@ -465,11 +465,10 @@ export default function Home() {
                   onClick={() => goToSlide(idx)}
                   aria-label={`Slide ${idx + 1}`}
                   title={slide.type === 'rate22k' ? '22K Gold Rate' : slide.type === 'rate24k' ? '24K Gold Rate' : undefined}
-                  className={`rounded-full transition-all duration-300 ${
-                    idx === activeSlide
+                  className={`rounded-full transition-all duration-300 ${idx === activeSlide
                       ? (slide.type !== 'image' ? 'bg-gold-400 w-6 h-2' : 'bg-gold-400 w-6 h-2')
                       : 'bg-white/30 w-2 h-2 hover:bg-white/60'
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -573,7 +572,53 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════════════════════════════════════
-          5. TESTIMONIALS
+          5. TRUSTED CLIENTS
+      ═══════════════════════════════════════════════════ */}
+      {(rate.homeConfig?.trustedClients ?? []).length > 0 && (
+        <section className="py-20 border-t border-white/5">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12">
+            <div className="text-center mb-12">
+              <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest mb-4 inline-block">Trusted By</span>
+              <h2 className="text-3xl md:text-4xl font-serif text-white font-bold mb-3">Our Trusted Clients</h2>
+              <div className="w-16 h-[2px] bg-gold-400 mx-auto rounded mt-4" />
+            </div>
+            <div className="flex flex-wrap justify-center items-center gap-10">
+              {(rate.homeConfig?.trustedClients ?? []).map((client, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.07, duration: 0.5 }}
+                  className="flex flex-col items-center gap-3 group"
+                  title={client.name}
+                >
+                  <div className="w-36 h-36 rounded-3xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center group-hover:border-gold-400/50 group-hover:bg-white/8 transition-all duration-300 p-3 shadow-[0_4px_24px_rgba(0,0,0,0.15)]">
+                    {client.image ? (
+                      <img
+                        src={client.image}
+                        alt={client.name}
+                        className="w-full h-full object-contain opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <span className="text-xs text-white/30 font-bold uppercase text-center leading-tight px-2">
+                        {client.name}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] uppercase tracking-[2px] text-white/30 group-hover:text-gold-400/70 transition-colors font-bold">
+                    {client.name}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════
+          6. TESTIMONIALS
       ═══════════════════════════════════════════════════ */}
       <section className="py-24 border-t border-white/5 bg-navy-900/40">
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
