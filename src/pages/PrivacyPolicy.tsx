@@ -20,7 +20,7 @@ export default function PrivacyPolicy() {
             <span className="text-[10px] uppercase tracking-[3px] text-gold-400 font-bold">Legal</span>
           </div>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">Privacy Policy</h1>
-          <p className="text-gray-500 text-sm">Last updated: April 2025 · NABA Gold Karigar</p>
+          <p className="text-gray-500 text-sm">Last updated: April 2026 · NABA</p>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div className="border-b border-white/5 pb-10">
       <h2 className="font-serif text-xl font-bold text-gold-400 mb-4">{title}</h2>
-      <div className="text-gray-400 text-sm leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_strong]:text-white [&_a]:text-gold-400">
+      <div className="text-gray-400 text-base leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_strong]:text-white [&_a]:text-gold-400">
         {children}
       </div>
     </div>
