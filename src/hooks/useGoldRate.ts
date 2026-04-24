@@ -32,6 +32,7 @@ export const DEFAULT_GOLD_SLIDE_CONFIG: GoldRateSlideConfig = {
 
 export interface HomeConfig {
   heroSlides?: HeroSlide[];
+  heroImage?: string;
   tickerText?: string;
   goldRateSlides?: GoldRateSlideConfig;
 }

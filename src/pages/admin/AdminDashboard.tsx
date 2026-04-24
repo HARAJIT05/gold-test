@@ -13,6 +13,7 @@ export default function AdminDashboard() {
     logoUrl: "",
     homeConfig: {
       heroSlides: [] as HeroSlide[],
+      heroImage: "",
       tickerText: "",
       goldRateSlides: { ...DEFAULT_GOLD_SLIDE_CONFIG } as GoldRateSlideConfig,
     }
@@ -38,6 +39,7 @@ export default function AdminDashboard() {
             logoUrl: data.logoUrl || "",
             homeConfig: {
               heroSlides: data.homeConfig?.heroSlides || [],
+              heroImage: data.homeConfig?.heroImage || "",
               tickerText: data.homeConfig?.tickerText || "",
               goldRateSlides: { ...DEFAULT_GOLD_SLIDE_CONFIG, ...(data.homeConfig?.goldRateSlides || {}) },
             }
@@ -230,6 +232,59 @@ export default function AdminDashboard() {
                 className="w-full px-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400 text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">This text scrolls across the top bar of the website. Leave blank to use the default message.</p>
+            </div>
+
+            {/* Hero Section Image */}
+            <div className="border-t border-white/10 pt-6">
+              <h3 className="font-bold text-lg text-white mb-1">Hero Section Image</h3>
+              <p className="text-xs text-gray-400 mb-4">This is the large full-screen image shown at the top of the homepage. It is <strong className="text-white">separate</strong> from the carousel slides.</p>
+              <div className="flex gap-4 items-start">
+                <div className="flex-1 space-y-3">
+                  <input
+                    type="text"
+                    value={rates.homeConfig.heroImage || ""}
+                    placeholder="https://example.com/hero.jpg"
+                    onChange={(e) => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, heroImage: e.target.value } }))}
+                    className="w-full px-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 text-sm"
+                  />
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500 uppercase tracking-widest">or</span>
+                    <label className={`flex items-center gap-2 px-4 py-2 bg-navy-800 border border-white/10 rounded-md cursor-pointer hover:bg-navy-700 transition-colors text-sm font-medium text-gray-300 ${uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                      {uploadingLogo ? 'Uploading...' : 'Upload Image'}
+                      <input type="file" accept="image/*" className="hidden" disabled={uploadingLogo}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingLogo(true);
+                          setMsg({ text: "Uploading hero image...", type: "" });
+                          try {
+                            const ext = file.name.split('.').pop();
+                            const path = `hero-${Date.now()}.${ext}`;
+                            const { error: upErr } = await supabase.storage.from('assets').upload(path, file);
+                            if (upErr) throw upErr;
+                            const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(path);
+                            setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, heroImage: publicUrl } }));
+                            setMsg({ text: "Hero image uploaded! Click 'Update System' to save.", type: "success" });
+                          } catch (err: any) {
+                            setMsg({ text: err.message || "Upload failed.", type: "error" });
+                          } finally {
+                            setUploadingLogo(false);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+                {rates.homeConfig.heroImage && (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-28 h-16 rounded-md bg-navy-900 border border-white/10 overflow-hidden flex-shrink-0">
+                      <img src={rates.homeConfig.heroImage} alt="Hero preview" className="w-full h-full object-cover" />
+                    </div>
+                    <button onClick={() => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, heroImage: "" } }))} className="text-xs text-red-500 hover:text-red-400 font-medium">Remove</button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Gold Rate Slides */}

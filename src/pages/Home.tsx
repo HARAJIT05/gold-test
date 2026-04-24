@@ -54,8 +54,8 @@ export default function Home() {
     ...heroSlides.map(s => ({ type: 'image' as const, data: s })),
   ];
 
-  // Hero full-screen: use the first regular slide's image
-  const heroSlide = heroSlides[0];
+  // Hero section uses its OWN dedicated image — independent from carousel slides
+  const heroImageUrl = rate.homeConfig?.heroImage ?? '';
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -119,10 +119,10 @@ export default function Home() {
           1. FULL-SCREEN HERO
       ═══════════════════════════════════════════════════ */}
       <section className="relative w-full bg-navy-950 flex items-center justify-center">
-        {heroSlide?.image ? (
+        {heroImageUrl ? (
           <div className="relative w-full">
             <img
-              src={heroSlide.image}
+              src={heroImageUrl}
               alt=""
               className="w-full h-auto max-h-[60vh] md:max-h-[70vh] lg:max-h-[85vh] xl:max-h-[90vh] object-contain md:object-cover object-center"
               referrerPolicy="no-referrer"

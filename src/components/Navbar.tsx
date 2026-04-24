@@ -51,7 +51,7 @@ export function Navbar() {
                 <span className="font-serif font-bold text-3xl tracking-tighter text-white">
                   NABA
                 </span>
-                <span className="text-[9px] uppercase tracking-[3px] text-gold-400/70 font-bold mt-0.5">
+                <span className="text-[11px] uppercase tracking-[3px] text-gold-400/70 font-bold mt-0.5">
                   Since 1992
                 </span>
               </div>
