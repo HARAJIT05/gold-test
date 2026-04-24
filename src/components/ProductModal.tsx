@@ -59,15 +59,19 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
     e.preventDefault();
     const name = form.name.trim();
     const phone = form.phone.trim();
-    if (!name || !phone) return;
+    if (!name || phone.length !== 10) return;
+
+    // Attach the currently-displayed product image (if any)
+    const imageUrl = images.length > 0 ? images[activeImg] : null;
 
     const text = encodeURIComponent(
-      `Hello! I'm interested in this product from NABA.\n\n` +
+      `Hello! I'm interested in this product from NABA GOLD.\n\n` +
       `*Product:* ${product.title}\n` +
       `*Category:* ${product.category}\n` +
       `*Weight:* ${product.weightInGrams}g\n` +
-      `*Est. Price:* ₹${price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}\n\n` +
-      `*My Name:* ${name}\n` +
+      `*Est. Price:* ₹${price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}\n` +
+      (imageUrl ? `*Image:* ${imageUrl}\n` : '') +
+      `\n*My Name:* ${name}\n` +
       `*Phone:* ${phone}\n\n` +
       `Please get in touch with me. Thank you!`
     );
@@ -323,7 +327,13 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
                               type="text"
                               required
                               value={form.name}
-                              onChange={(e) => setForm({ ...form, name: e.target.value })}
+                              onChange={(e) =>
+                                setForm({
+                                  ...form,
+                                  // Allow only letters (including accented) and spaces
+                                  name: e.target.value.replace(/[^a-zA-Z\u00C0-\u024F\s]/g, ''),
+                                })
+                              }
                               placeholder="e.g. Priya Sharma"
                               className="w-full bg-navy-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-[#25D366]/50 focus:ring-1 focus:ring-[#25D366]/20 transition-all"
                             />
@@ -335,9 +345,19 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
                             <input
                               type="tel"
                               required
+                              maxLength={10}
+                              pattern="\d{10}"
+                              title="Enter a 10-digit phone number"
+                              inputMode="numeric"
                               value={form.phone}
-                              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                              placeholder="e.g. +91 98765 43210"
+                              onChange={(e) =>
+                                setForm({
+                                  ...form,
+                                  // Allow only digits, max 10 characters
+                                  phone: e.target.value.replace(/\D/g, '').slice(0, 10),
+                                })
+                              }
+                              placeholder="e.g. 9876543210"
                               className="w-full bg-navy-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-[#25D366]/50 focus:ring-1 focus:ring-[#25D366]/20 transition-all"
                             />
                           </div>

@@ -17,7 +17,7 @@ export default function About() {
           <div className="border-l-2 border-gold-400 pl-8 py-2 mx-auto max-w-2xl mb-16">
             <p className="text-2xl leading-relaxed font-serif italic text-white/80">
               "Established in 1992 under the visionary leadership of Mr. Naba Kumar Shaw,
-              NABA has grown into a distinguished name in gold manufacturing and wholesale.
+              NABA GOLD has grown into a distinguished name in gold manufacturing and wholesale.
               With over three decades of excellence, we have built a legacy defined by
               craftsmanship, precision, and trust."
             </p>

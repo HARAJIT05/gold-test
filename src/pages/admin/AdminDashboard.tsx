@@ -232,7 +232,7 @@ export default function AdminDashboard() {
                     homeConfig: { ...prev.homeConfig, tickerText: e.target.value }
                   }))
                 }
-                placeholder="e.g. Welcome to NABA Gold Karigar · Est. 1992"
+                placeholder="e.g. Welcome to NABA GOLD · Est. 1992"
                 className="w-full px-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md shadow-sm outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400 text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">This text scrolls across the top bar of the website. Leave blank to use the default message.</p>

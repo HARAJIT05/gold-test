@@ -20,7 +20,7 @@ export default function PrivacyPolicy() {
             <span className="text-[10px] uppercase tracking-[3px] text-gold-400 font-bold">Legal</span>
           </div>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">Privacy Policy</h1>
-          <p className="text-gray-500 text-sm">Last updated: April 2026 · NABA</p>
+          <p className="text-gray-500 text-sm">Last updated: April 2026 · NABA GOLD</p>
         </div>
       </div>
 
@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
 
         <Section title="Introduction">
           <p>
-            This Privacy Policy of NABA outlines how we collect, use, and protect the information shared through our website and business interactions. This policy applies solely to information collected through our website/application.
+            This Privacy Policy of NABA GOLD outlines how we collect, use, and protect the information shared through our website and business interactions. This policy applies solely to information collected through our website/application.
           </p>
         </Section>
 

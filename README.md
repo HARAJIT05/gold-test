@@ -1,6 +1,6 @@
-# NABA Gold Karigar
+# NABA GOLD Karigar
 
-NABA Gold Karigar is a modern, responsive web application for a gold manufacturing business based in Kalyan, Mumbai. It exclusively focuses on 22K gold jewelry, featuring a live product catalog, real-time gold market rates, a customer review system, and a comprehensive admin dashboard for managing stock and settings.
+NABA GOLD Karigar is a modern, responsive web application for a gold manufacturing business based in Kalyan, Mumbai. It exclusively focuses on 22K gold jewelry, featuring a live product catalog, real-time gold market rates, a customer review system, and a comprehensive admin dashboard for managing stock and settings.
 
 ## 🚀 Tech Stack
 

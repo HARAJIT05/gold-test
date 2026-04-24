@@ -1,6 +1,6 @@
 import { useGoldRate } from '../hooks/useGoldRate';
 
-const DEFAULT_TICKER = 'Welcome to NABA Gold Karigar \u00a0\u00a0\u2727\u00a0\u00a0 Est. 1992 · Kalyan, Mumbai \u00a0\u00a0\u2727\u00a0\u00a0 Premium 22K Gold Manufacturing & Wholesale';
+const DEFAULT_TICKER = 'Welcome to NABA GOLD \u00a0\u00a0\u2727\u00a0\u00a0 Est. 1992 · Kalyan, Mumbai \u00a0\u00a0\u2727\u00a0\u00a0 Premium 22K Gold Manufacturing & Wholesale';
 
 export function TopTicker() {
   const { rate, loading } = useGoldRate();

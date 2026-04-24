@@ -43,13 +43,13 @@ export function Navbar() {
             <Link to="/" className="flex items-center gap-4 flex-shrink-0">
               <img
                 src={rate.logoUrl || '/naba-logo.png'}
-                alt="NABA Logo"
+                alt="NABA GOLD Logo"
                 className="h-20 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
               <div className="flex flex-col leading-none">
                 <span className="font-serif font-bold text-3xl tracking-tighter text-white">
-                  NABA
+                  NABA GOLD
                 </span>
                 <span className="text-[11px] uppercase tracking-[3px] text-gold-400/70 font-bold mt-0.5">
                   Since 1992

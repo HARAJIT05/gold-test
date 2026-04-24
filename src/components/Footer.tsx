@@ -40,12 +40,12 @@ export function Footer() {
             <Link to="/" className="flex items-center gap-4 mb-6">
               <img
                 src={footerLogo}
-                alt="NABA Logo"
+                alt="NABA GOLD Logo"
                 className="h-20 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
               <div className="flex flex-col leading-none">
-                <span className="font-serif font-bold text-3xl tracking-tighter text-white">NABA</span>
+                <span className="font-serif font-bold text-3xl tracking-tighter text-white">NABA GOLD</span>
                 <span className="text-[11px] uppercase tracking-[3px] text-gold-400/70 font-bold mt-0.5">Since 1992</span>
               </div>
             </Link>
@@ -161,7 +161,7 @@ export function Footer() {
 
         {/* ── Bottom bar ── */}
         <div className="mt-12 pt-8 border-t border-white/5 text-center text-[10px] uppercase tracking-widest text-gray-500 flex flex-col md:flex-row justify-between items-center">
-          <p>&copy; {new Date().getFullYear()} NABA. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} NABA GOLD. All rights reserved.</p>
           <div className="mt-4 md:mt-0 font-bold">
             Made by : <a href="www.google.com" target="_blank" rel="noopener noreferrer" className="hover:text-gold-400 transition-colors">TEST</a>
           </div>

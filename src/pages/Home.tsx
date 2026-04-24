@@ -155,7 +155,7 @@ export default function Home() {
                 A Trusted Gold Manufacturing & Wholesale Brand.
               </h2>
               <p className="text-sm text-gray-400 leading-relaxed mb-8 max-w-md">
-                NABA is a trusted gold manufacturing and wholesale brand with over 30 years of experience. With its own manufacturing unit and skilled goldsmiths, it crafts 22K gold with precision and purity. Along with ready-made products, it also specializes in custom-designed gold as per client requirements, making it a reliable and long-term business partner.              </p>
+                NABA GOLD is a trusted gold manufacturing and wholesale brand with over 30 years of experience. With its own manufacturing unit and skilled goldsmiths, it crafts 22K gold with precision and purity. Along with ready-made products, it also specializes in custom-designed gold as per client requirements, making it a reliable and long-term business partner.              </p>
               <Link
                 to="/about"
                 className="inline-flex items-center gap-2 text-gold-400 hover:text-gold-300 text-xs font-bold uppercase tracking-widest transition-colors group"

@@ -20,14 +20,14 @@ export default function TermsAndConditions() {
             <span className="text-[10px] uppercase tracking-[3px] text-gold-400 font-bold">Legal</span>
           </div>
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-white mb-3">Terms &amp; Conditions</h1>
-          <p className="text-gray-500 text-sm">Last updated: April 2025 · NABA Gold Karigar</p>
+          <p className="text-gray-500 text-sm">Last updated: April 2026 · NABA GOLD</p>
         </div>
       </div>
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-6 lg:px-12 py-16 space-y-12">
         <Section title="Introduction">
-          <p>Welcome to NABA. By engaging in business with us, you agree to the following terms:</p>
+          <p>Welcome to NABA GOLD. By engaging in business with us, you agree to the following terms:</p>
         </Section>
 
         <Section title="Business Nature">
