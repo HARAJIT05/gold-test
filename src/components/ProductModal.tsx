@@ -48,13 +48,16 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
     if (!form.name.trim() || !form.phone.trim()) return;
     setSending(true);
 
+    const imageUrl = product.images?.[0] ? `*Image:* ${product.images[0]}\n` : '';
+
     const text = encodeURIComponent(
       `Hello! I'm interested in this product from NABA.\n\n` +
       `*Product:* ${product.title}\n` +
       `*Category:* ${product.category}\n` +
       `*Weight:* ${product.weightInGrams}g\n` +
-      `*Est. Price:* ₹${price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}\n\n` +
-      `*My Name:* ${form.name}\n` +
+      `*Est. Price:* ₹${price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}\n` +
+      imageUrl +
+      `\n*My Name:* ${form.name}\n` +
       `*Phone:* ${form.phone}\n\n` +
       `Please get in touch with me. Thank you!`
     );

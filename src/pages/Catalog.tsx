@@ -23,13 +23,13 @@ interface Product {
   stockQuantity: number;
 }
 
-type View = 'categories' | 'subcategories' | 'products';
+type View = 'subcategories' | 'products';
 
 export default function Catalog() {
   const { rate, loading: rateLoading } = useGoldRate();
 
   // Navigation state
-  const [view, setView] = useState<View>('categories');
+  const [view, setView] = useState<View>('subcategories');
   const [activeCat, setActiveCat] = useState<Category | null>(null);
   const [activeSub, setActiveSub] = useState<Subcategory | null>(null);
 
@@ -47,32 +47,33 @@ export default function Catalog() {
   // Modal
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // ── Load categories on mount ───────────────────────────
+  // ── Load categories & subcategories on mount ───────────────────────────
   useEffect(() => {
-    fetchCategories()
-      .then(setCategories)
-      .finally(() => setLoadingCats(false));
+    Promise.all([
+      fetchCategories().then(setCategories),
+      fetchSubcategories().then(setSubcategories)
+    ]).finally(() => setLoadingCats(false));
   }, []);
 
-  // ── Load subcategories when a category is selected ────
-  useEffect(() => {
-    if (!activeCat) return;
-    fetchSubcategories(activeCat.id).then(setSubcategories);
-  }, [activeCat]);
+  const visibleSubcategories = useMemo(() => {
+    if (!activeCat) return subcategories;
+    return subcategories.filter(s => s.category_id === activeCat.id);
+  }, [subcategories, activeCat]);
 
   // ── Load products when entering product view ──────────
   useEffect(() => {
-    if (view !== 'products' || !activeCat) return;
+    if (view !== 'products' || !activeSub) return;
     setLoadingProds(true);
     async function load() {
       let query = supabase
         .from('products')
         .select('*')
         .eq('isHidden', false)
-        .eq('category', activeCat!.name);
+        .eq('subCategory', activeSub!.name);
 
-      if (activeSub) {
-        query = query.eq('subCategory', activeSub.name);
+      const parentCat = categories.find(c => c.id === activeSub!.category_id);
+      if (parentCat) {
+        query = query.eq('category', parentCat.name);
       }
 
       const { data } = await query;
@@ -80,7 +81,7 @@ export default function Catalog() {
       setLoadingProds(false);
     }
     load();
-  }, [view, activeCat, activeSub]);
+  }, [view, activeSub, categories]);
 
   // ── Price calc ────────────────────────────────────────
   const calculatePrice = (p: Product) => {
@@ -102,20 +103,9 @@ export default function Catalog() {
   }, [products, stockFilter, sortParam, rate.rate22k]);
 
   // ── Navigation helpers ────────────────────────────────
-  const goToCategory = (cat: Category) => {
-    setActiveCat(cat);
-    setActiveSub(null);
-    setView('subcategories');
-  };
-
-  const goToSubcategory = (sub: Subcategory | null) => {
-    setActiveSub(sub); // null = "All"
+  const goToSubcategory = (sub: Subcategory) => {
+    setActiveSub(sub);
     setView('products');
-  };
-
-  const goBack = () => {
-    if (view === 'products') { setView('subcategories'); setActiveSub(null); }
-    else if (view === 'subcategories') { setView('categories'); setActiveCat(null); }
   };
 
   // ─────────────────────────────────────────────────────
@@ -123,46 +113,29 @@ export default function Catalog() {
   // ─────────────────────────────────────────────────────
   const Breadcrumb = () => (
     <nav className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-bold mb-8 flex-wrap">
-      <button onClick={() => { setView('categories'); setActiveCat(null); setActiveSub(null); }}
+      <button onClick={() => { setView('subcategories'); setActiveSub(null); }}
         className="flex items-center gap-1 text-gray-500 hover:text-gold-400 transition-colors">
         <Home className="w-3 h-3" /> Catalog
       </button>
-      {activeCat && (
-        <>
-          <ChevronRight className="w-3 h-3 text-gray-600" />
-          <button
-            onClick={() => { setView('subcategories'); setActiveSub(null); }}
-            className={`transition-colors ${view === 'subcategories' ? 'text-white' : 'text-gray-500 hover:text-gold-400'}`}
-          >
-            {activeCat.name}
-          </button>
-        </>
-      )}
       {activeSub && (
         <>
           <ChevronRight className="w-3 h-3 text-gray-600" />
           <span className="text-white">{activeSub.name}</span>
         </>
       )}
-      {view === 'products' && !activeSub && activeCat && (
-        <>
-          <ChevronRight className="w-3 h-3 text-gray-600" />
-          <span className="text-white">All {activeCat.name}</span>
-        </>
-      )}
     </nav>
   );
 
   // ─────────────────────────────────────────────────────
-  //  VIEW: Categories
+  //  VIEW: Subcategories (Main Catalog View)
   // ─────────────────────────────────────────────────────
-  if (view === 'categories') {
+  if (view === 'subcategories') {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-white mb-2">Our Catalog</h1>
-          <p className="text-gray-400">Browse our collection by category</p>
+          <p className="text-gray-400">Choose a style to explore</p>
           <div className="flex items-center gap-3 mt-2">
             <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-emerald-400">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
@@ -174,39 +147,67 @@ export default function Catalog() {
           </div>
         </div>
 
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-2 mb-10">
+          <button
+            onClick={() => setActiveCat(null)}
+            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${
+              activeCat === null 
+                ? 'bg-gold-400 text-navy-950' 
+                : 'bg-navy-900 text-gray-400 border border-white/10 hover:border-gold-400/50 hover:text-gold-400'
+            }`}
+          >
+            All Items
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCat(cat)}
+              className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${
+                activeCat?.id === cat.id 
+                  ? 'bg-gold-400 text-navy-950' 
+                  : 'bg-navy-900 text-gray-400 border border-white/10 hover:border-gold-400/50 hover:text-gold-400'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
         {loadingCats ? (
           <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-gold-400" /></div>
-        ) : categories.length === 0 ? (
-          <div className="text-center py-20">
+        ) : visibleSubcategories.length === 0 ? (
+          <div className="text-center py-20 bg-navy-900/50 rounded-3xl border border-white/5">
             <LayoutGrid className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl text-white font-medium mb-2">No categories yet</h3>
-            <p className="text-gray-500 text-sm">An admin needs to create categories first.</p>
+            <h3 className="text-xl text-white font-medium mb-2">No styles found</h3>
+            <p className="text-gray-500 text-sm">Select a different category or check back later.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-            {categories.map((cat, i) => (
+            {/* Subcategory tiles */}
+            {visibleSubcategories.map((sub, i) => (
               <motion.button
-                key={cat.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                onClick={() => goToCategory(cat)}
-                className="group relative rounded-3xl overflow-hidden aspect-square bg-navy-900 border border-white/10 hover:border-gold-400/50 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_32px_rgba(253,179,82,0.1)] cursor-pointer text-left"
+                key={sub.id}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
+                onClick={() => goToSubcategory(sub)}
+                className="group relative rounded-3xl overflow-hidden aspect-square bg-navy-900 border border-white/10 hover:border-gold-400/50 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_32px_rgba(253,179,82,0.1)] cursor-pointer text-left flex flex-col"
               >
-                {cat.image ? (
-                  <img src={cat.image} alt={cat.name} referrerPolicy="no-referrer"
+                {sub.image ? (
+                  <img src={sub.image} alt={sub.name} referrerPolicy="no-referrer"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <LayoutGrid className="w-12 h-12 text-white/10" />
+                    <LayoutGrid className="w-10 h-10 text-white/10" />
                   </div>
                 )}
-                {/* Dark overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/30 to-transparent" />
-                {/* Label */}
                 <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <p className="font-serif font-bold text-white text-lg leading-tight">{cat.name}</p>
-                  <div className="flex items-center gap-1 mt-1 text-gold-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <p className="font-serif font-bold text-white text-base leading-tight">{sub.name}</p>
+                  {/* Find category name for display */}
+                  <span className="text-[9px] uppercase tracking-widest text-gold-400 font-bold block mt-1">
+                    {categories.find(c => c.id === sub.category_id)?.name}
+                  </span>
+                  <div className="flex items-center gap-1 mt-2 text-gold-400 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="text-[10px] uppercase tracking-widest font-bold">Browse</span>
                     <ChevronRight className="w-3 h-3" />
                   </div>
@@ -215,68 +216,6 @@ export default function Catalog() {
             ))}
           </div>
         )}
-      </div>
-    );
-  }
-
-  // ─────────────────────────────────────────────────────
-  //  VIEW: Subcategories
-  // ─────────────────────────────────────────────────────
-  if (view === 'subcategories') {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <Breadcrumb />
-
-        <div className="mb-10">
-          <h1 className="text-4xl font-serif font-bold text-white mb-2">{activeCat?.name}</h1>
-          <p className="text-gray-400">Choose a style to explore</p>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-          {/* "All" tile */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}
-            onClick={() => goToSubcategory(null)}
-            className="group relative rounded-3xl overflow-hidden aspect-square bg-navy-900 border border-gold-400/30 hover:border-gold-400/70 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.15)] cursor-pointer"
-          >
-            {activeCat?.image ? (
-              <img src={activeCat.image} alt={activeCat.name} referrerPolicy="no-referrer"
-                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
-            ) : null}
-            <div className="absolute inset-0 bg-gradient-to-t from-navy-950/95 via-navy-950/60 to-navy-950/20" />
-            <div className="absolute bottom-0 left-0 right-0 p-5">
-              <span className="text-[9px] uppercase tracking-[3px] font-bold text-gold-400 block mb-1">All Items</span>
-              <p className="font-serif font-bold text-white text-lg leading-tight">All {activeCat?.name}</p>
-            </div>
-          </motion.button>
-
-          {/* Subcategory tiles */}
-          {subcategories.map((sub, i) => (
-            <motion.button
-              key={sub.id}
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: (i + 1) * 0.06 }}
-              onClick={() => goToSubcategory(sub)}
-              className="group relative rounded-3xl overflow-hidden aspect-square bg-navy-900 border border-white/10 hover:border-gold-400/50 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_32px_rgba(253,179,82,0.1)] cursor-pointer"
-            >
-              {sub.image ? (
-                <img src={sub.image} alt={sub.name} referrerPolicy="no-referrer"
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <LayoutGrid className="w-10 h-10 text-white/10" />
-                </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <p className="font-serif font-bold text-white text-base leading-tight">{sub.name}</p>
-                <div className="flex items-center gap-1 mt-1 text-gold-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[10px] uppercase tracking-widest font-bold">Browse</span>
-                  <ChevronRight className="w-3 h-3" />
-                </div>
-              </div>
-            </motion.button>
-          ))}
-        </div>
       </div>
     );
   }
@@ -292,7 +231,7 @@ export default function Catalog() {
       <div className="flex flex-col md:flex-row justify-between mb-8 items-start md:items-center border-b border-white/10 pb-6">
         <div>
           <h1 className="text-4xl font-serif font-bold text-white mb-1">
-            {activeSub ? activeSub.name : `All ${activeCat?.name}`}
+            {activeSub?.name}
           </h1>
           <p className="text-gray-400 text-sm">
             {filtered.length} item{filtered.length !== 1 ? 's' : ''} · live pricing
