@@ -47,9 +47,14 @@ export function Navbar() {
                 className="h-20 w-auto object-contain"
                 referrerPolicy="no-referrer"
               />
-              <span className="font-serif font-bold text-3xl tracking-tighter text-white leading-none">
-                NABA
-              </span>
+              <div className="flex flex-col leading-none">
+                <span className="font-serif font-bold text-3xl tracking-tighter text-white">
+                  NABA
+                </span>
+                <span className="text-[9px] uppercase tracking-[3px] text-gold-400/70 font-bold mt-0.5">
+                  Since 1992
+                </span>
+              </div>
             </Link>
 
             {/* Desktop nav links — pushed to the right with ml-auto */}
