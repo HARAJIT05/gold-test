@@ -28,7 +28,7 @@ export function TopTicker() {
 
       <style>{`
         .ticker-track {
-          animation: ticker-scroll 40s linear infinite;
+          animation: ticker-scroll 200s linear infinite;
           will-change: transform;
         }
         .ticker-track:hover {

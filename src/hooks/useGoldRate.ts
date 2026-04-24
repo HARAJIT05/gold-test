@@ -12,9 +12,28 @@ export interface HeroSlide {
   ctaLink: string;
 }
 
+export interface GoldRateSlideConfig {
+  show22k: boolean;
+  show24k: boolean;
+  badge22k: string;
+  badge24k: string;
+  sub22k: string;
+  sub24k: string;
+}
+
+export const DEFAULT_GOLD_SLIDE_CONFIG: GoldRateSlideConfig = {
+  show22k: true,
+  show24k: true,
+  badge22k: 'Live Market Rate',
+  badge24k: 'Live Market Rate',
+  sub22k: 'Today\'s 22K gold rate, updated live from global markets.',
+  sub24k: 'Today\'s 24K gold rate, updated live from global markets.',
+};
+
 export interface HomeConfig {
   heroSlides?: HeroSlide[];
   tickerText?: string;
+  goldRateSlides?: GoldRateSlideConfig;
 }
 
 const defaultSlides: HeroSlide[] = [

@@ -2,16 +2,19 @@ import { useState, useEffect, ChangeEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { Loader2, Save, UploadCloud } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { HeroSlide } from "../../hooks/useGoldRate";
+import { HeroSlide, GoldRateSlideConfig, DEFAULT_GOLD_SLIDE_CONFIG } from "../../hooks/useGoldRate";
 import { logAdminAction } from "../../lib/audit";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [rates, setRates] = useState({
+    rate22k: 0,
+    rate24k: 0,
     logoUrl: "",
     homeConfig: {
       heroSlides: [] as HeroSlide[],
       tickerText: "",
+      goldRateSlides: { ...DEFAULT_GOLD_SLIDE_CONFIG } as GoldRateSlideConfig,
     }
   });
   const [loading, setLoading] = useState(true);
@@ -30,10 +33,13 @@ export default function AdminDashboard() {
           
         if (data) {
           setRates({
+            rate22k: data.rate22k || 0,
+            rate24k: data.rate24k || 0,
             logoUrl: data.logoUrl || "",
             homeConfig: {
               heroSlides: data.homeConfig?.heroSlides || [],
               tickerText: data.homeConfig?.tickerText || "",
+              goldRateSlides: { ...DEFAULT_GOLD_SLIDE_CONFIG, ...(data.homeConfig?.goldRateSlides || {}) },
             }
           });
         }
@@ -54,6 +60,8 @@ export default function AdminDashboard() {
         .from('settings')
         .upsert({
           id: 'goldRate',
+          rate22k: Number(rates.rate22k),
+          rate24k: Number(rates.rate24k),
           logoUrl: rates.logoUrl,
           homeConfig: rates.homeConfig,
           lastUpdated: Date.now()
@@ -224,7 +232,154 @@ export default function AdminDashboard() {
               <p className="text-xs text-gray-500 mt-1">This text scrolls across the top bar of the website. Leave blank to use the default message.</p>
             </div>
 
-            <div className="border-t border-gray-100 pt-6">
+            {/* Gold Rate Slides */}
+            <div className="border-t border-white/10 pt-6">
+              <h3 className="font-bold text-lg text-white mb-1">Gold Rate Carousel Slides</h3>
+              <p className="text-xs text-gray-400 mb-4">Two special slides showing live gold rates appear at the end of the hero carousel. Set override rate to 0 to show live market price.</p>
+
+              <div className="grid sm:grid-cols-2 gap-6 mb-5">
+                {/* 22K Override */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">22K Override Rate (₹/gram)</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-mono">₹</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={rates.rate22k || ""}
+                      onChange={(e) => setRates(prev => ({ ...prev, rate22k: Number(e.target.value) || 0 }))}
+                      placeholder="0"
+                      className="w-full pl-8 pr-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md outline-none focus:ring-2 focus:ring-gold-400 font-mono text-lg"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-1">Leave 0 to show live API rate.</p>
+                </div>
+
+                {/* 24K Override */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">24K Override Rate (₹/gram)</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-mono">₹</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={rates.rate24k || ""}
+                      onChange={(e) => setRates(prev => ({ ...prev, rate24k: Number(e.target.value) || 0 }))}
+                      placeholder="0"
+                      className="w-full pl-8 pr-4 py-3 border border-white/10 bg-navy-800 text-white rounded-md outline-none focus:ring-2 focus:ring-gold-400 font-mono text-lg"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-1">Leave 0 to show live API rate.</p>
+                </div>
+              </div>
+
+              {/* Toggles + text config */}
+              <div className="space-y-5">
+                {/* 22K Slide */}
+                <div className="bg-navy-800 rounded-xl p-4 border border-white/5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-bold text-white">22K Gold Slide</h4>
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <span className="text-xs text-gray-400">Show</span>
+                      <div
+                        onClick={() =>
+                          setRates(prev => ({
+                            ...prev,
+                            homeConfig: {
+                              ...prev.homeConfig,
+                              goldRateSlides: {
+                                ...prev.homeConfig.goldRateSlides,
+                                show22k: !prev.homeConfig.goldRateSlides.show22k,
+                              }
+                            }
+                          }))
+                        }
+                        className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
+                          rates.homeConfig.goldRateSlides.show22k ? 'bg-gold-400' : 'bg-white/20'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${
+                          rates.homeConfig.goldRateSlides.show22k ? 'left-5' : 'left-0.5'
+                        }`} />
+                      </div>
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Badge Label</label>
+                      <input type="text"
+                        value={rates.homeConfig.goldRateSlides.badge22k}
+                        onChange={(e) => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, goldRateSlides: { ...prev.homeConfig.goldRateSlides, badge22k: e.target.value } } }))}
+                        className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                        placeholder="Live Market Rate"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Subheading</label>
+                      <input type="text"
+                        value={rates.homeConfig.goldRateSlides.sub22k}
+                        onChange={(e) => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, goldRateSlides: { ...prev.homeConfig.goldRateSlides, sub22k: e.target.value } } }))}
+                        className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                        placeholder="Today's 22K gold rate, updated live."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 24K Slide */}
+                <div className="bg-navy-800 rounded-xl p-4 border border-white/5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-bold text-white">24K Gold Slide</h4>
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <span className="text-xs text-gray-400">Show</span>
+                      <div
+                        onClick={() =>
+                          setRates(prev => ({
+                            ...prev,
+                            homeConfig: {
+                              ...prev.homeConfig,
+                              goldRateSlides: {
+                                ...prev.homeConfig.goldRateSlides,
+                                show24k: !prev.homeConfig.goldRateSlides.show24k,
+                              }
+                            }
+                          }))
+                        }
+                        className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
+                          rates.homeConfig.goldRateSlides.show24k ? 'bg-gold-400' : 'bg-white/20'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${
+                          rates.homeConfig.goldRateSlides.show24k ? 'left-5' : 'left-0.5'
+                        }`} />
+                      </div>
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Badge Label</label>
+                      <input type="text"
+                        value={rates.homeConfig.goldRateSlides.badge24k}
+                        onChange={(e) => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, goldRateSlides: { ...prev.homeConfig.goldRateSlides, badge24k: e.target.value } } }))}
+                        className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                        placeholder="Live Market Rate"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Subheading</label>
+                      <input type="text"
+                        value={rates.homeConfig.goldRateSlides.sub24k}
+                        onChange={(e) => setRates(prev => ({ ...prev, homeConfig: { ...prev.homeConfig, goldRateSlides: { ...prev.homeConfig.goldRateSlides, sub24k: e.target.value } } }))}
+                        className="w-full bg-navy-900 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                        placeholder="Today's 24K gold rate, updated live."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/10 pt-6">
               <label className="block text-sm font-medium text-gray-300 mb-1">Brand Logo Image</label>
               <div className="flex gap-4 items-start">
                 <div className="flex-1 space-y-3">

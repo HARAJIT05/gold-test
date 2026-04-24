@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, ChevronLeft, ChevronRight, Award, Shield, Gem, Users } from "lucide-react";
-import { useGoldRate } from "../hooks/useGoldRate";
+import { ArrowRight, Star, ChevronLeft, ChevronRight, Award, Shield, Gem, Users, TrendingUp } from "lucide-react";
+import { useGoldRate, DEFAULT_GOLD_SLIDE_CONFIG } from "../hooks/useGoldRate";
 import { supabase } from "../lib/supabase";
 
 /* ── Skeleton shimmer ── */
@@ -43,29 +43,39 @@ export default function Home() {
   const [loadingReviews, setLoadingReviews] = useState(true);
 
   // Carousel state
-  const slides = rate.homeConfig?.heroSlides ?? [];
+  const heroSlides = rate.homeConfig?.heroSlides ?? [];
+  const goldConfig = { ...DEFAULT_GOLD_SLIDE_CONFIG, ...(rate.homeConfig?.goldRateSlides ?? {}) };
+
+  // Gold rate slides always appear FIRST; admin image slides follow
+  type SlideType = { type: 'image'; data: typeof heroSlides[0] } | { type: 'rate22k' } | { type: 'rate24k' };
+  const allSlides: SlideType[] = [
+    ...(goldConfig.show22k ? [{ type: 'rate22k' as const }] : []),
+    ...(goldConfig.show24k ? [{ type: 'rate24k' as const }] : []),
+    ...heroSlides.map(s => ({ type: 'image' as const, data: s })),
+  ];
+
+  // Hero full-screen: use the first regular slide's image
+  const heroSlide = heroSlides[0];
+
   const [activeSlide, setActiveSlide] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  // Hero full-screen: use the first slide's image
-  const heroSlide = slides[0];
-
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (allSlides.length <= 1) return;
     const id = setInterval(() => {
       setDirection(1);
-      setActiveSlide(prev => (prev + 1) % slides.length);
+      setActiveSlide(prev => (prev + 1) % allSlides.length);
     }, 5000);
     return () => clearInterval(id);
-  }, [slides.length]);
+  }, [allSlides.length]);
 
   useEffect(() => {
-    if (activeSlide >= slides.length && slides.length > 0) setActiveSlide(0);
-  }, [slides.length, activeSlide]);
+    if (activeSlide >= allSlides.length && allSlides.length > 0) setActiveSlide(0);
+  }, [allSlides.length, activeSlide]);
 
   const goToSlide = (index: number) => { setDirection(index > activeSlide ? 1 : -1); setActiveSlide(index); };
-  const prevSlide = () => { setDirection(-1); setActiveSlide(prev => (prev - 1 + slides.length) % slides.length); };
-  const nextSlide = () => { setDirection(1); setActiveSlide(prev => (prev + 1) % slides.length); };
+  const prevSlide = () => { setDirection(-1); setActiveSlide(prev => (prev - 1 + allSlides.length) % allSlides.length); };
+  const nextSlide = () => { setDirection(1); setActiveSlide(prev => (prev + 1) % allSlides.length); };
 
   useEffect(() => {
     supabase
@@ -100,7 +110,7 @@ export default function Home() {
     exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? -80 : 80 }),
   };
 
-  const activeSlideData = slides[activeSlide];
+  const activeSlideData = allSlides[activeSlide];
 
   return (
     <div className="bg-navy-950">
@@ -176,7 +186,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════
           3. CAROUSEL
       ═══════════════════════════════════════════════════ */}
-      {slides.length > 0 && (
+      {allSlides.length > 0 && (
         <section className="relative overflow-hidden min-h-[480px] md:min-h-[560px] border-t border-white/5">
           <AnimatePresence custom={direction} mode="wait">
             <motion.div
@@ -189,50 +199,253 @@ export default function Home() {
               transition={{ duration: 0.45, ease: "easeInOut" }}
               className="relative w-full min-h-[480px] md:min-h-[560px]"
             >
-              {/* Mobile background image */}
-              <div className="lg:hidden absolute inset-0 z-0">
-                {activeSlideData?.image
-                  ? <img src={activeSlideData.image} alt={activeSlideData.heading} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  : <div className="w-full h-full bg-navy-900" />
-                }
-                <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-navy-950/20" />
-              </div>
+              {/* ── RATE SLIDES — PREMIUM REDESIGN ── */}
+              {(activeSlideData.type === 'rate22k' || activeSlideData.type === 'rate24k') && (() => {
+                const is22k = activeSlideData.type === 'rate22k';
+                const karat = is22k ? '22K' : '24K';
+                const purity = is22k ? '91.6%' : '99.9%';
+                const rate_val = is22k ? rate.rate22k : rate.rate24k;
+                const isOverride = is22k ? rate.adminRate22k > 0 : rate.adminRate24k > 0;
+                const badge = is22k ? goldConfig.badge22k : goldConfig.badge24k;
+                const sub = is22k ? goldConfig.sub22k : goldConfig.sub24k;
+                // 22K = warm gold palette, 24K = cooler champagne/bright gold
+                const accentA = is22k ? 'rgba(212,160,23,0.12)' : 'rgba(255,215,100,0.10)';
+                const accentB = is22k ? 'rgba(180,130,10,0.06)' : 'rgba(240,200,80,0.07)';
 
-              {/* Desktop image — right bleed */}
-              {activeSlideData?.image && (
-                <div className="hidden lg:block absolute inset-y-0 right-0 w-[55%] z-0 pointer-events-none">
-                  <img src={activeSlideData.image} alt={activeSlideData.heading} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/60 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-navy-950/30 via-transparent to-navy-950/30" />
-                </div>
-              )}
+                return (
+                  <>
+                    {/* ── Background ── */}
+                    <div className="absolute inset-0 z-0 overflow-hidden">
+                      {/* Base */}
+                      <div className="absolute inset-0 bg-navy-950" />
 
-              {/* Text content */}
-              <div className="relative z-10 px-6 lg:px-16 grid grid-cols-1 lg:grid-cols-12 items-center min-h-[480px] lg:min-h-[560px] py-20 lg:py-0">
-                <div className="col-span-1 lg:col-span-6 flex flex-col gap-5 mt-auto lg:mt-0">
-                  {activeSlideData?.badge && (
-                    <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest w-fit">
-                      {activeSlideData.badge}
-                    </span>
-                  )}
-                  <h2 className="font-serif text-4xl md:text-5xl leading-[1.1] text-white drop-shadow-md">
-                    {activeSlideData?.heading}
-                  </h2>
-                  <p className="text-sm text-gray-300 md:text-gray-400 leading-relaxed max-w-sm drop-shadow">
-                    {activeSlideData?.subheading}
-                  </p>
-                  {activeSlideData?.ctaText && (
-                    <Link to={activeSlideData.ctaLink || "/catalog"} className="inline-flex items-center gap-2 bg-gold-400 text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors w-fit shadow-lg">
-                      {activeSlideData.ctaText} <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  )}
-                </div>
-              </div>
+                      {/* Diagonal accent stripe */}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background: `linear-gradient(118deg, transparent 52%, ${accentA} 52%, ${accentA} 100%)`,
+                        }}
+                      />
+
+                      {/* Second diagonal for depth */}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background: `linear-gradient(118deg, transparent 58%, ${accentB} 58%, ${accentB} 100%)`,
+                        }}
+                      />
+
+                      {/* Fine dot-grid texture — only right half */}
+                      <div
+                        className="absolute right-0 inset-y-0 w-[55%] opacity-20"
+                        style={{
+                          backgroundImage: `radial-gradient(circle, rgba(212,172,40,0.35) 1px, transparent 1px)`,
+                          backgroundSize: '28px 28px',
+                        }}
+                      />
+
+                      {/* Radial glow */}
+                      <div
+                        className="absolute right-[15%] top-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full"
+                        style={{ background: `radial-gradient(circle, ${accentA} 0%, transparent 70%)` }}
+                      />
+
+                      {/* Top-left subtle line accent */}
+                      <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-transparent via-gold-400/20 to-transparent" />
+                      <div className="absolute top-8 left-0 w-24 h-[1px] bg-gradient-to-r from-gold-400/30 to-transparent" />
+                      <div className="absolute bottom-8 left-0 w-16 h-[1px] bg-gradient-to-r from-gold-400/20 to-transparent" />
+                    </div>
+
+                    {/* ── Content ── */}
+                    <div className="relative z-10 min-h-[480px] md:min-h-[560px] flex items-center">
+                      <div className="w-full px-6 lg:px-16 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-0 py-16 lg:py-0 items-center">
+
+                        {/* LEFT — Typography block */}
+                        <div className="flex flex-col gap-5">
+                          {/* Top row: badge + live pill */}
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="text-[9px] px-3 py-1 rounded-full border border-gold-400/60 text-gold-400 uppercase tracking-[3px] font-bold">
+                              {badge}
+                            </span>
+                            {isOverride ? (
+                              <span className="inline-flex items-center gap-1.5 bg-amber-400/10 border border-amber-400/30 px-2.5 py-1 rounded-full">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span className="text-[9px] font-bold uppercase tracking-[2px] text-amber-400">Override</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 bg-emerald-400/10 border border-emerald-400/30 px-2.5 py-1 rounded-full">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="text-[9px] font-bold uppercase tracking-[2px] text-emerald-400">Live Market</span>
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Karat type label */}
+                          <div className="flex items-baseline gap-3">
+                            <span className="font-serif text-6xl md:text-8xl font-bold text-gold-400 leading-none">{karat}</span>
+                            <span className="text-xs uppercase tracking-[4px] text-white/40 font-bold self-end pb-2">Gold</span>
+                          </div>
+
+                          {/* Rate number — giant */}
+                          <div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-white/30 font-serif text-3xl md:text-4xl pt-3 font-bold">₹</span>
+                              <span className="font-serif font-bold text-white leading-none" style={{ fontSize: 'clamp(3rem, 7vw, 6rem)' }}>
+                                {rate_val > 0 ? rate_val.toLocaleString('en-IN') : (
+                                  <span className="text-white/15 text-4xl">—</span>
+                                )}
+                              </span>
+                            </div>
+                            <p className="text-xs text-white/30 uppercase tracking-widest mt-1.5 pl-1">per gram · Indian Rupee</p>
+                          </div>
+
+                          {/* Gold divider */}
+                          <div className="flex items-center gap-3">
+                            <div className="h-[1px] w-10 bg-gold-400/50" />
+                            <span className="text-[10px] uppercase tracking-[3px] text-gold-400/50 font-bold">Purity {purity}</span>
+                            <div className="h-[1px] flex-1 bg-white/5" />
+                          </div>
+
+                          {/* Purity visual bar */}
+                          <div className="flex flex-col gap-1.5 max-w-xs">
+                            <div className="h-[3px] w-full rounded-full bg-white/8 overflow-hidden">
+                              <motion.div
+                                initial={{ scaleX: 0 }}
+                                animate={{ scaleX: 1 }}
+                                transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
+                                style={{ originX: 0, width: is22k ? '91.6%' : '100%' }}
+                                className="h-full rounded-full bg-gradient-to-r from-gold-400 to-amber-300"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Subheading */}
+                          <p className="text-sm text-gray-500 leading-relaxed max-w-sm">{sub}</p>
+
+                          {/* CTA */}
+                          <div className="flex items-center gap-4 pt-1">
+                            <Link
+                              to="/catalog"
+                              className="inline-flex items-center gap-2 bg-gold-400 hover:bg-gold-500 text-navy-950 px-7 py-3.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all duration-300 shadow-[0_8px_30px_rgba(212,160,23,0.25)] hover:shadow-[0_8px_40px_rgba(212,160,23,0.4)] hover:-translate-y-0.5 w-fit"
+                            >
+                              Browse Catalog <ArrowRight className="w-3 h-3" />
+                            </Link>
+                          </div>
+                        </div>
+
+                        {/* RIGHT — Glassmorphism info panel */}
+                        <div className="hidden lg:flex items-center justify-center lg:justify-end pr-4">
+                          <div className="relative w-[280px]">
+                            {/* Main glass card */}
+                            <div className="relative bg-white/[0.03] border border-white/10 rounded-3xl p-7 backdrop-blur-sm overflow-hidden">
+                              {/* Shimmer overlay */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-gold-400/[0.06] via-transparent to-transparent pointer-events-none rounded-3xl" />
+
+                              {/* Karat badge — large */}
+                              <div className="flex items-center justify-between mb-6">
+                                <div>
+                                  <p className="text-[9px] uppercase tracking-[3px] text-white/30 font-bold mb-0.5">Karat</p>
+                                  <p className="font-serif text-5xl font-bold text-gold-400">{karat}</p>
+                                </div>
+                                <div className="w-14 h-14 rounded-2xl bg-gold-400/10 border border-gold-400/20 flex items-center justify-center">
+                                  <TrendingUp className="w-6 h-6 text-gold-400" />
+                                </div>
+                              </div>
+
+                              {/* Divider */}
+                              <div className="h-[1px] bg-white/8 mb-5" />
+
+                              {/* Stats grid */}
+                              <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] uppercase tracking-widest text-white/30">Purity</span>
+                                  <span className="text-sm font-bold text-white font-mono">{purity}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] uppercase tracking-widest text-white/30">Rate / gram</span>
+                                  <span className="text-sm font-bold text-gold-400 font-mono">
+                                    {rate_val > 0 ? `₹${rate_val.toLocaleString('en-IN')}` : '—'}
+                                  </span>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] uppercase tracking-widest text-white/30">Standard</span>
+                                  <span className="text-[10px] font-bold text-white/50">BIS Hallmarked</span>
+                                </div>
+                              </div>
+
+                              {/* Bottom accent bar */}
+                              <div className="mt-6 h-[2px] rounded-full bg-gradient-to-r from-gold-400/60 via-amber-300/40 to-transparent" />
+                            </div>
+
+                            {/* Floating accent dot top-right */}
+                            <div className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-gold-400/20 border border-gold-400/30 flex items-center justify-center">
+                              <div className="w-2 h-2 rounded-full bg-gold-400/60" />
+                            </div>
+                            {/* Floating accent dot bottom-left */}
+                            <div className="absolute -bottom-2 -left-2 w-4 h-4 rounded-full bg-gold-400/15 border border-gold-400/20" />
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+
+
+              {/* ── IMAGE SLIDES ── */}
+              {activeSlideData.type === 'image' && (() => {
+                const s = activeSlideData.data;
+                return (
+                  <>
+                    {/* Mobile background image */}
+                    <div className="lg:hidden absolute inset-0 z-0">
+                      {s?.image
+                        ? <img src={s.image} alt={s.heading} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        : <div className="w-full h-full bg-navy-900" />
+                      }
+                      <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-navy-950/20" />
+                    </div>
+
+                    {/* Desktop image — right bleed */}
+                    {s?.image && (
+                      <div className="hidden lg:block absolute inset-y-0 right-0 w-[55%] z-0 pointer-events-none">
+                        <img src={s.image} alt={s.heading} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/60 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-navy-950/30 via-transparent to-navy-950/30" />
+                      </div>
+                    )}
+
+                    {/* Text content */}
+                    <div className="relative z-10 px-6 lg:px-16 grid grid-cols-1 lg:grid-cols-12 items-center min-h-[480px] lg:min-h-[560px] py-20 lg:py-0">
+                      <div className="col-span-1 lg:col-span-6 flex flex-col gap-5 mt-auto lg:mt-0">
+                        {s?.badge && (
+                          <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest w-fit">
+                            {s.badge}
+                          </span>
+                        )}
+                        <h2 className="font-serif text-4xl md:text-5xl leading-[1.1] text-white drop-shadow-md">
+                          {s?.heading}
+                        </h2>
+                        <p className="text-sm text-gray-300 md:text-gray-400 leading-relaxed max-w-sm drop-shadow">
+                          {s?.subheading}
+                        </p>
+                        {s?.ctaText && (
+                          <Link to={s.ctaLink || "/catalog"} className="inline-flex items-center gap-2 bg-gold-400 text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors w-fit shadow-lg">
+                            {s.ctaText} <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </motion.div>
           </AnimatePresence>
 
           {/* Arrows */}
-          {slides.length > 1 && (
+          {allSlides.length > 1 && (
             <>
               <button onClick={prevSlide} className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-navy-900/80 border border-white/10 flex items-center justify-center text-white hover:border-gold-400/40 transition-all z-20 backdrop-blur-sm" aria-label="Previous slide">
                 <ChevronLeft className="w-4 h-4" />
@@ -244,18 +457,26 @@ export default function Home() {
           )}
 
           {/* Dots */}
-          {slides.length > 1 && (
+          {allSlides.length > 1 && (
             <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-              {slides.map((_, idx) => (
-                <button key={idx} onClick={() => goToSlide(idx)} aria-label={`Slide ${idx + 1}`}
-                  className={`rounded-full transition-all duration-300 ${idx === activeSlide ? "bg-gold-400 w-6 h-2" : "bg-white/30 w-2 h-2 hover:bg-white/60"}`}
+              {allSlides.map((slide, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => goToSlide(idx)}
+                  aria-label={`Slide ${idx + 1}`}
+                  title={slide.type === 'rate22k' ? '22K Gold Rate' : slide.type === 'rate24k' ? '24K Gold Rate' : undefined}
+                  className={`rounded-full transition-all duration-300 ${
+                    idx === activeSlide
+                      ? (slide.type !== 'image' ? 'bg-gold-400 w-6 h-2' : 'bg-gold-400 w-6 h-2')
+                      : 'bg-white/30 w-2 h-2 hover:bg-white/60'
+                  }`}
                 />
               ))}
             </div>
           )}
-          {slides.length > 1 && (
+          {allSlides.length > 1 && (
             <div className="absolute bottom-5 right-5 text-[10px] font-bold text-white/25 z-20 hidden md:block">
-              {activeSlide + 1} / {slides.length}
+              {activeSlide + 1} / {allSlides.length}
             </div>
           )}
         </section>
