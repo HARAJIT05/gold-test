@@ -1,6 +1,6 @@
-import { useState, useRef, FormEvent } from 'react';
+import React, { useState, useRef, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronLeft, ChevronRight, MessageCircle, Send, Scale, Tag, Package } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, MessageCircle, Scale, Tag, Package, Maximize2 } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -20,22 +20,20 @@ interface Product {
 
 interface Props {
   product: Product;
-  price: number;
-  rate22k: number;
   onClose: () => void;
 }
 
 const WHATSAPP_NUMBER = '919330340211';
 
-export function ProductModal({ product, price, rate22k, onClose }: Props) {
+export function ProductModal({ product, onClose }: Props) {
   const karat = product.goldKarat || '22K';
-  const activeRate = rate22k;
   const [activeImg, setActiveImg] = useState(0);
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '' });
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState({ x: 50, y: 50, show: false });
+  const [fullscreenImg, setFullscreenImg] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
@@ -69,7 +67,6 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
       `*Product:* ${product.title}\n` +
       `*Category:* ${product.category}\n` +
       `*Weight:* ${product.weightInGrams}g\n` +
-      `*Est. Price:* ₹${price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}\n` +
       (imageUrl ? `*Image:* ${imageUrl}\n` : '') +
       `\n*My Name:* ${name}\n` +
       `*Phone:* ${phone}\n\n` +
@@ -171,6 +168,17 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
                   </div>
                 )}
 
+                {/* Fullscreen button — mobile only */}
+                {images.length > 0 && (
+                  <button
+                    onClick={() => setFullscreenImg(true)}
+                    className="absolute top-3 left-3 z-20 md:hidden w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-all"
+                    aria-label="View fullscreen"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                )}
+
                 {/* Out of stock overlay */}
                 {product.isOutofStock && (
                   <div className="absolute inset-0 bg-navy-950/70 flex items-center justify-center">
@@ -268,32 +276,6 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
                     </span>
                     <span className="text-gray-500 text-[10px] uppercase tracking-wide">In Stock</span>
                   </div>
-                </div>
-
-                {/* Live Price */}
-                <div className="bg-gradient-to-r from-gold-400/10 to-gold-500/5 border border-gold-400/20 rounded-2xl p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest text-gold-400/70 font-bold mb-1 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-                        Live Estimated Price
-                      </p>
-                      {activeRate > 0 ? (
-                        <p className="font-serif text-3xl font-bold text-gold-400">
-                          ₹{price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-                        </p>
-                      ) : (
-                        <p className="text-amber-400 text-sm font-semibold">Rate unavailable</p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">{karat} Rate</p>
-                      <p className="text-white font-medium text-sm">₹{activeRate.toLocaleString('en-IN')}/g</p>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-gray-500 mt-2">
-                    * Price calculated on today's live {karat} gold rate. Final price may vary.
-                  </p>
                 </div>
 
                 {/* Enquiry form (inline reveal) */}
@@ -411,6 +393,62 @@ export function ProductModal({ product, price, rate22k, onClose }: Props) {
           </div>
         </div>
       </motion.div>
+
+      {/* ── Fullscreen image overlay (mobile) ── */}
+      <AnimatePresence>
+        {fullscreenImg && images.length > 0 && (
+          <motion.div
+            key="fullscreen"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
+          >
+            {/* Image */}
+            <img
+              src={images[activeImg]}
+              alt={product.title}
+              className="w-full h-full object-contain select-none"
+              referrerPolicy="no-referrer"
+            />
+
+            {/* Close */}
+            <button
+              onClick={() => setFullscreenImg(false)}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/70 border border-white/20 flex items-center justify-center text-white"
+              aria-label="Close fullscreen"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Counter pill */}
+            {images.length > 1 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                {activeImg + 1} / {images.length}
+              </div>
+            )}
+
+            {/* Prev / Next */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveImg((i) => (i - 1 + images.length) % images.length)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 flex items-center justify-center text-white"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => setActiveImg((i) => (i + 1) % images.length)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 flex items-center justify-center text-white"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AnimatePresence>
   );
 }

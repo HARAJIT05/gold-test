@@ -4,6 +4,7 @@
  */
 
 import { Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import RootLayout from "./layouts/RootLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import Home from "./pages/Home";
@@ -22,7 +23,9 @@ import AdminCategories from "./pages/admin/AdminCategories";
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       <Route element={<RootLayout />}>
         <Route index element={<Home />} />
         <Route path="catalog" element={<Catalog />} />
@@ -42,5 +45,6 @@ export default function App() {
         <Route path="logs" element={<AdminLogs />} />
       </Route>
     </Routes>
+    </>
   );
 }

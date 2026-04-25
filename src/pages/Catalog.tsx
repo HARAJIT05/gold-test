@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useGoldRate } from '../hooks/useGoldRate';
 import { motion, AnimatePresence } from 'motion/react';
-import { Loader2, Search, Eye, Zap, ChevronRight, Home, LayoutGrid } from 'lucide-react';
+import { Loader2, Search, Eye, ChevronRight, Home, LayoutGrid } from 'lucide-react';
 import { ProductModal } from '../components/ProductModal';
 import { fetchCategories, fetchSubcategories, Category, Subcategory } from '../lib/categories';
 
@@ -27,7 +26,6 @@ interface Product {
 type View = 'subcategories' | 'products';
 
 export default function Catalog() {
-  const { rate, loading: rateLoading } = useGoldRate();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -44,7 +42,7 @@ export default function Catalog() {
   const [loadingProds, setLoadingProds] = useState(false);
 
   // Filters (only in products view)
-  const [sortParam, setSortParam] = useState<'popular' | 'price_asc' | 'price_desc'>('popular');
+  const [sortParam, setSortParam] = useState<'popular'>('popular');
   const [stockFilter, setStockFilter] = useState<'all' | 'in_stock'>('in_stock');
 
   // Modal
@@ -106,24 +104,13 @@ export default function Catalog() {
     load();
   }, [view, activeSub, categories]);
 
-  // ── Price calc ────────────────────────────────────────
-  const calculatePrice = (p: Product) => {
-    const base = p.weightInGrams * rate.rate22k;
-    const making = p.chargeType === 'flat' ? p.makingCharge : base * (p.makingCharge / 100);
-    return Math.round(base + making);
-  };
-
   // ── Sort/filter products ──────────────────────────────
   const filtered = useMemo(() => {
     let r = [...products];
     if (stockFilter === 'in_stock') r = r.filter(p => !p.isOutofStock);
-    r.sort((a, b) => {
-      if (sortParam === 'popular') return (b.popularityScore || 0) - (a.popularityScore || 0);
-      const pa = calculatePrice(a), pb = calculatePrice(b);
-      return sortParam === 'price_asc' ? pa - pb : pb - pa;
-    });
+    r.sort((a, b) => (b.popularityScore || 0) - (a.popularityScore || 0));
     return r;
-  }, [products, stockFilter, sortParam, rate.rate22k]);
+  }, [products, stockFilter]);
 
   // ── Navigation helpers ────────────────────────────────
   const goToSubcategory = (sub: Subcategory) => {
@@ -158,15 +145,6 @@ export default function Catalog() {
       <div className="mb-8">
         <h1 className="text-4xl font-serif font-bold text-white mb-2">Our Catalog</h1>
         <p className="text-gray-400">Choose a style to explore</p>
-        <div className="flex items-center gap-3 mt-2">
-          <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-            Live Rates
-          </span>
-          {!rateLoading && rate.rate22k > 0 && (
-            <span className="text-[10px] text-gray-500">22K: <span className="text-white font-semibold">₹{rate.rate22k.toLocaleString('en-IN')}/g</span></span>
-          )}
-        </div>
       </div>
 
       {/* Filters */}
@@ -255,7 +233,7 @@ export default function Catalog() {
             {activeSub?.name}
           </h1>
           <p className="text-gray-400 text-sm">
-            {filtered.length} item{filtered.length !== 1 ? 's' : ''} · live pricing
+            {filtered.length} item{filtered.length !== 1 ? 's' : ''}
           </p>
         </div>
 
@@ -274,22 +252,7 @@ export default function Catalog() {
               <option value="all" style={{ background: '#0a1e35' }}>All</option>
             </select>
           </div>
-          {/* Sort */}
-          <div className="flex items-center gap-2 bg-navy-900 px-4 py-2.5 border border-white/10 rounded-lg">
-            <span className="text-gold-400 text-sm font-semibold">Sort</span>
-            <span className="text-white/20">|</span>
-            <select
-              className="bg-navy-900 border-none outline-none text-sm font-medium text-white cursor-pointer"
-              style={{ colorScheme: 'dark' }}
-              value={sortParam}
-              onChange={e => setSortParam(e.target.value as any)}
-            >
-              <option value="popular" style={{ background: '#0a1e35' }}>Popularity</option>
-              <option value="price_asc" style={{ background: '#0a1e35' }}>Price: Low → High</option>
-              <option value="price_desc" style={{ background: '#0a1e35' }}>Price: High → Low</option>
-            </select>
           </div>
-        </div>
       </div>
 
       {/* Products grid */}
@@ -305,7 +268,6 @@ export default function Catalog() {
         <AnimatePresence>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((product, idx) => {
-              const price = calculatePrice(product);
               return (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -357,17 +319,7 @@ export default function Catalog() {
                     </div>
                     <p className="text-gray-500 text-xs line-clamp-2 leading-relaxed mb-4 flex-1">{product.description}</p>
                     <div className="border-t border-dashed border-gold-400/20 pt-4 mt-auto">
-                      <div className="flex justify-between items-end">
-                        <div className="flex flex-col">
-                          <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">
-                            <Zap className="w-2.5 h-2.5 text-emerald-400" /> Live Est.
-                          </span>
-                          {rate.rate22k > 0 ? (
-                            <span className="font-serif text-xl font-bold text-gold-400">₹{price.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                          ) : (
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Awaiting Rate</span>
-                          )}
-                        </div>
+                      <div className="flex justify-end items-end">
                         <div className="text-right flex flex-col">
                           <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">Weight</span>
                           <span className="text-sm font-medium text-white">{product.weightInGrams}g</span>
@@ -396,8 +348,6 @@ export default function Catalog() {
       {selectedProduct && (
         <ProductModal
           product={selectedProduct}
-          price={calculatePrice(selectedProduct)}
-          rate22k={rate.rate22k}
           onClose={() => setSelectedProduct(null)}
         />
       )}

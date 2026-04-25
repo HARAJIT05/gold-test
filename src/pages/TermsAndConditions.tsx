@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, ArrowLeft } from 'lucide-react';
 
@@ -60,7 +61,7 @@ export default function TermsAndConditions() {
 
         <Section title="Pricing & Payment">
           <ul>
-            <li>Pricing is based on the prevailing gold rate at the time of order confirmation.</li>
+            <li>Pricing shall be determined based on the prevailing gold rate on the date of delivery.</li>
             <li>Applicable GST and other charges will be added as per government norms.</li>
             <li>Payment terms must be fulfilled as agreed before delivery.</li>
           </ul>
