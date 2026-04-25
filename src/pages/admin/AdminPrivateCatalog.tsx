@@ -245,7 +245,7 @@ export default function AdminPrivateCatalog() {
         <span className="text-gold-400 mt-0.5">🔒</span>
         <div>
           <p className="text-sm font-semibold text-white mb-0.5">Exclusive products — not visible in the public catalog</p>
-          <p className="text-xs text-gray-500">Products added here are only accessible at <span className="text-gold-400 font-mono">/private-catalog</span>. Share this URL only with intended recipients.</p>
+          <p className="text-xs text-gray-500">Products added here are only accessible at <span className="text-gold-400 font-mono">/private-catalogue</span>. Share this URL only with intended recipients.</p>
         </div>
       </div>
 
