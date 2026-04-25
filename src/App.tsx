@@ -9,6 +9,7 @@ import RootLayout from "./layouts/RootLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
+import PrivateCatalog from "./pages/PrivateCatalog";
 import Reviews from "./pages/Reviews";
 import About from "./pages/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -17,6 +18,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCatalog from "./pages/admin/AdminCatalog";
+import AdminPrivateCatalog from "./pages/admin/AdminPrivateCatalog";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminCategories from "./pages/admin/AdminCategories";
@@ -29,6 +31,7 @@ export default function App() {
       <Route element={<RootLayout />}>
         <Route index element={<Home />} />
         <Route path="catalog" element={<Catalog />} />
+        <Route path="private-catalog" element={<PrivateCatalog />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="about" element={<About />} />
         <Route path="privacy-policy" element={<PrivacyPolicy />} />
@@ -40,6 +43,7 @@ export default function App() {
       <Route path="admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="catalog" element={<AdminCatalog />} />
+        <Route path="private-catalog" element={<AdminPrivateCatalog />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="reviews" element={<AdminReviews />} />
         <Route path="logs" element={<AdminLogs />} />

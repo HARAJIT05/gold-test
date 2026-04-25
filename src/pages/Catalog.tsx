@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Loader2, Search, Eye, ChevronRight, Home, LayoutGrid } from 'lucide-react';
 import { ProductModal } from '../components/ProductModal';
 import { fetchCategories, fetchSubcategories, Category, Subcategory } from '../lib/categories';
+import { useGoldRate } from '../hooks/useGoldRate';
 
 interface Product {
   id: string;
@@ -21,6 +22,7 @@ interface Product {
   isHidden: boolean;
   isOutofStock: boolean;
   stockQuantity: number;
+  showPrice: boolean;
 }
 
 type View = 'subcategories' | 'products';
@@ -90,6 +92,7 @@ export default function Catalog() {
         .from('products')
         .select('*')
         .eq('isHidden', false)
+        .eq('isExclusive', false)
         .eq('subCategory', activeSub!.name);
 
       const parentCat = categories.find(c => c.id === activeSub!.category_id);
@@ -103,6 +106,14 @@ export default function Catalog() {
     }
     load();
   }, [view, activeSub, categories]);
+
+  // ── Gold rate for price calculation ──────────────────
+  const { rate } = useGoldRate();
+
+  const calcPrice = (p: Product) => {
+    const base = p.weightInGrams * rate.rate22k;
+    return Math.round(base + (p.chargeType === 'flat' ? p.makingCharge : (base * p.makingCharge) / 100));
+  };
 
   // ── Sort/filter products ──────────────────────────────
   const filtered = useMemo(() => {
@@ -319,11 +330,17 @@ export default function Catalog() {
                     </div>
                     <p className="text-gray-500 text-xs line-clamp-2 leading-relaxed mb-4 flex-1">{product.description}</p>
                     <div className="border-t border-dashed border-gold-400/20 pt-4 mt-auto">
-                      <div className="flex justify-end items-end">
-                        <div className="text-right flex flex-col">
+                      <div className="flex justify-between items-end">
+                        <div className="flex flex-col">
                           <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">Weight</span>
                           <span className="text-sm font-medium text-white">{product.weightInGrams}g</span>
                         </div>
+                        {product.showPrice && rate.rate22k > 0 && (
+                          <div className="text-right flex flex-col">
+                            <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">Price</span>
+                            <span className="text-base font-bold text-gold-400 font-serif">₹{calcPrice(product).toLocaleString('en-IN')}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

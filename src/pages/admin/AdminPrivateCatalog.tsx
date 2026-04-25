@@ -6,7 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { logAdminAction } from "../../lib/audit";
 import { fetchCategories, fetchSubcategories, Category, Subcategory } from "../../lib/categories";
 
-export default function AdminCatalog() {
+export default function AdminPrivateCatalog() {
   const { user } = useAuth();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ export default function AdminCatalog() {
   async function fetchProducts() {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('products').select('*').order('createdAt', { ascending: false });
+      const { data, error } = await supabase.from('products').select('*').eq('isExclusive', true).order('createdAt', { ascending: false });
       if (data) {
         setProducts(data);
       }
@@ -75,6 +75,7 @@ export default function AdminCatalog() {
       isHidden: false,
       isOutofStock: false,
       showPrice: false,
+      isExclusive: true,
       stockQuantity: 0
     });
     
@@ -229,14 +230,23 @@ export default function AdminCatalog() {
 
   return (
     <div className="relative">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">Catalog Manager</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">Private Catalog Manager</h1>
         <button 
           onClick={handleAdd}
           className="flex items-center gap-2 bg-navy-900 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors shadow-sm self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" /> Add Item
         </button>
+      </div>
+
+      {/* Info banner */}
+      <div className="mb-8 flex items-start gap-3 bg-navy-900 border border-gold-400/20 rounded-2xl px-5 py-4">
+        <span className="text-gold-400 mt-0.5">🔒</span>
+        <div>
+          <p className="text-sm font-semibold text-white mb-0.5">Exclusive products — not visible in the public catalog</p>
+          <p className="text-xs text-gray-500">Products added here are only accessible at <span className="text-gold-400 font-mono">/private-catalog</span>. Share this URL only with intended recipients.</p>
+        </div>
       </div>
 
       {/* ── Mobile card list (hidden on md+) ── */}

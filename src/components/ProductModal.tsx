@@ -16,6 +16,7 @@ interface Product {
   isHidden: boolean;
   isOutofStock: boolean;
   stockQuantity: number;
+  showPrice: boolean;
 }
 
 interface Props {
@@ -260,9 +261,13 @@ export function ProductModal({ product, onClose }: Props) {
                   </div>
                   <div className="bg-navy-950 rounded-xl p-3 flex flex-col items-center gap-1 border border-white/5">
                     <Tag className="w-4 h-4 text-gold-400" />
-                    <span className="text-white font-bold text-sm">
-                      {product.chargeType === 'flat' ? `₹${product.makingCharge}` : `${product.makingCharge}%`}
-                    </span>
+                    {product.showPrice ? (
+                      <span className="text-white font-bold text-sm">
+                        {product.chargeType === 'flat' ? `₹${product.makingCharge}` : `${product.makingCharge}%`}
+                      </span>
+                    ) : (
+                      <span className="text-white/30 font-bold text-[10px] text-center leading-tight">On<br/>Request</span>
+                    )}
                     <span className="text-gray-500 text-[10px] uppercase tracking-wide">Making</span>
                   </div>
                   <div className="bg-gold-400/10 border-gold-400/20 rounded-xl p-3 flex flex-col items-center gap-1 border">

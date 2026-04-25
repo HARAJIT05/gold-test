@@ -24,6 +24,7 @@ interface Product {
   popularityScore: number;
   isHidden: boolean;
   isOutofStock: boolean;
+  showPrice: boolean;
 }
 
 interface Review {
@@ -80,8 +81,9 @@ export default function Home() {
   useEffect(() => {
     supabase
       .from("products")
-      .select("id,title,category,images,weightInGrams,makingCharge,chargeType,goldKarat,popularityScore,isHidden,isOutofStock")
+      .select("id,title,category,images,weightInGrams,makingCharge,chargeType,goldKarat,popularityScore,isHidden,isOutofStock,showPrice")
       .eq("isHidden", false)
+      .eq("isExclusive", false)
       .order("popularityScore", { ascending: false })
       .order("createdAt", { ascending: false })
       .limit(3)
@@ -515,9 +517,9 @@ export default function Home() {
       <section className="py-24 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
           <div className="text-center mb-16">
-            <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest mb-4 inline-block">Live Pricing</span>
+            <span className="text-[10px] px-3 py-1 rounded-full border border-gold-400 text-gold-400 uppercase tracking-widest mb-4 inline-block">Featured</span>
             <h2 className="text-3xl md:text-4xl font-serif text-white font-bold mb-3">Featured Collection</h2>
-            <p className="text-sm text-gray-500 max-w-md mx-auto">Our most sought-after pieces, priced at today's live gold rate.</p>
+            <p className="text-sm text-gray-500 max-w-md mx-auto">Our most sought-after pieces, crafted in 22K gold by skilled artisans.</p>
             <div className="w-20 h-[2px] bg-gold-400 mx-auto rounded mt-5" />
           </div>
 
@@ -550,7 +552,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {featuredProducts.map((product, idx) => {
                 const imageUrl = product.images?.[0];
-                const price = rate.rate22k > 0 ? calcPrice(product) : null;
+                const price = product.showPrice && rate.rate22k > 0 ? calcPrice(product) : null;
                 return (
                   <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: idx * 0.12 }}>
                     <Link to="/catalog" state={{ openProductId: product.id }} className="block bg-navy-900 rounded-2xl overflow-hidden group border border-white/5 hover:border-gold-400/30 transition-all duration-300 hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)]">
@@ -580,7 +582,9 @@ export default function Home() {
                         <h3 className="font-serif text-lg text-white mb-1 group-hover:text-gold-400 transition-colors">{product.title}</h3>
                         <p className="text-xs text-gray-500 mb-4">{product.weightInGrams}g · {product.goldKarat || "22K"} Gold</p>
                         <div className="flex items-center justify-between">
-                          {price ? <span className="text-gold-400 font-bold text-lg font-serif">₹{price.toLocaleString("en-IN")}</span> : <span className="text-gray-500 text-xs">Rate loading…</span>}
+                          {price !== null
+                            ? <span className="text-gold-400 font-bold text-lg font-serif">₹{price.toLocaleString("en-IN")}</span>
+                            : <span />}
                           <span className="inline-flex items-center gap-1 text-xs font-semibold text-gold-400 group-hover:gap-2 transition-all">View <ArrowRight className="w-3 h-3" /></span>
                         </div>
                       </div>

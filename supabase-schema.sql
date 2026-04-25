@@ -1,6 +1,6 @@
 -- ============================================================
 -- NABA GOLD KARIGAR — Complete Supabase Schema
--- Last updated: 2026-04-22
+-- Last updated: 2026-04-25
 -- ============================================================
 -- HOW TO USE:
 --   Supabase Dashboard → SQL Editor → New Query → paste → Run
@@ -70,6 +70,8 @@ CREATE TABLE IF NOT EXISTS products (
   category        text        NOT NULL,
   "isHidden"      boolean     DEFAULT false,
   "isOutofStock"  boolean     DEFAULT false,
+  "showPrice"     boolean     DEFAULT false,
+  "isExclusive"   boolean     DEFAULT false,
   "stockQuantity" integer     DEFAULT 0,
   "createdAt"     bigint      NOT NULL,
   "updatedAt"     bigint      NOT NULL
@@ -81,6 +83,8 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS "stockQuantity" integer DEFAULT 0;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "popularityScore" integer DEFAULT 0;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "isHidden" boolean DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "isOutofStock" boolean DEFAULT false;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS "showPrice"    boolean DEFAULT false;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS "isExclusive"  boolean DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS images text[] DEFAULT '{}';
 
 -- Fix any NULLs that snuck in
@@ -88,6 +92,8 @@ UPDATE products SET "stockQuantity" = 0 WHERE "stockQuantity" IS NULL;
 UPDATE products SET "popularityScore" = 0 WHERE "popularityScore" IS NULL;
 UPDATE products SET "isHidden" = false WHERE "isHidden" IS NULL;
 UPDATE products SET "isOutofStock" = false WHERE "isOutofStock" IS NULL;
+UPDATE products SET "showPrice" = false WHERE "showPrice" IS NULL;
+UPDATE products SET "isExclusive" = false WHERE "isExclusive" IS NULL;
 UPDATE products SET images = '{}' WHERE images IS NULL;
 
 
