@@ -7,6 +7,16 @@ import { useGoldRate } from '../hooks/useGoldRate';
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { rate } = useGoldRate();
+  const [hasPrivateAccess, setHasPrivateAccess] = useState(
+    () => localStorage.getItem('hasPrivateAccess') === 'true'
+  );
+
+  // Re-check on storage changes (e.g. if user opens private catalogue in another tab)
+  useEffect(() => {
+    const handler = () => setHasPrivateAccess(localStorage.getItem('hasPrivateAccess') === 'true');
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
 
   // Dynamically update the browser favicon whenever the admin logo changes
   useEffect(() => {
@@ -20,9 +30,10 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Catalog', path: '/catalog' },
+    { name: 'Catalogue', path: '/catalog' },
     { name: 'Reviews', path: '/reviews' },
     { name: 'About', path: '/about' },
+    ...(hasPrivateAccess ? [{ name: 'Private Catalogue', path: '/private-catalogue' }] : []),
   ];
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>

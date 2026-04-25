@@ -34,6 +34,11 @@ export default function PrivateCatalog() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { rate } = useGoldRate();
 
+  // ── Grant access: store flag in localStorage so navbar shows the link ──
+  useEffect(() => {
+    localStorage.setItem('hasPrivateAccess', 'true');
+  }, []);
+
   useEffect(() => {
     const openProductId = location.state?.openProductId;
     if (openProductId) {
