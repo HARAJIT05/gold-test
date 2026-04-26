@@ -1,6 +1,6 @@
 -- ============================================================
 -- NABA GOLD KARIGAR — Complete Supabase Schema
--- Last updated: 2026-04-25
+-- Last updated: 2026-04-26
 -- ============================================================
 -- HOW TO USE:
 --   Supabase Dashboard → SQL Editor → New Query → paste → Run
@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS products (
   "isOutofStock"  boolean     DEFAULT false,
   "showPrice"     boolean     DEFAULT false,
   "isExclusive"   boolean     DEFAULT false,
+  "showInPublic"  boolean     DEFAULT false,
   "stockQuantity" integer     DEFAULT 0,
   "createdAt"     bigint      NOT NULL,
   "updatedAt"     bigint      NOT NULL
@@ -85,6 +86,7 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS "isHidden" boolean DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "isOutofStock" boolean DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "showPrice"    boolean DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS "isExclusive"  boolean DEFAULT false;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS "showInPublic" boolean NOT NULL DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS images text[] DEFAULT '{}';
 
 -- Fix any NULLs that snuck in
@@ -94,6 +96,7 @@ UPDATE products SET "isHidden" = false WHERE "isHidden" IS NULL;
 UPDATE products SET "isOutofStock" = false WHERE "isOutofStock" IS NULL;
 UPDATE products SET "showPrice" = false WHERE "showPrice" IS NULL;
 UPDATE products SET "isExclusive" = false WHERE "isExclusive" IS NULL;
+UPDATE products SET "showInPublic" = false WHERE "showInPublic" IS NULL;
 UPDATE products SET images = '{}' WHERE images IS NULL;
 
 
@@ -366,6 +369,9 @@ CREATE INDEX IF NOT EXISTS idx_products_oos
 
 CREATE INDEX IF NOT EXISTS idx_products_created
   ON products ("createdAt" DESC);
+
+CREATE INDEX IF NOT EXISTS idx_products_show_in_public
+  ON products ("showInPublic");
 
 -- Speed up admin reviews page
 CREATE INDEX IF NOT EXISTS idx_reviews_approved

@@ -77,6 +77,7 @@ export default function AdminPrivateCatalog() {
       isOutofStock: false,
       showPrice: false,
       isExclusive: true,
+      showInPublic: false,
       stockQuantity: 0
     });
     
@@ -268,6 +269,7 @@ export default function AdminPrivateCatalog() {
                 </div>
                 {/* Status badges */}
                 <div className="flex flex-wrap gap-1.5 mt-2">
+                  {p.showInPublic && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-blue-900/50 border border-blue-600/30 text-blue-400 px-2 py-0.5 rounded-full">Public</span>}
                   {p.isHidden && <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full"><EyeOff className="w-3 h-3"/>Hidden</span>}
                   {p.isOutofStock && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-amber-900/50 border border-amber-600/30 text-amber-400 px-2 py-0.5 rounded-full">Out of Stock</span>}
                   {!p.isHidden && !p.isOutofStock && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-emerald-900/50 border border-emerald-600/30 text-emerald-400 px-2 py-0.5 rounded-full">Active</span>}
@@ -326,7 +328,8 @@ export default function AdminPrivateCatalog() {
                   </td>
                   <td className="p-5 text-sm font-medium text-white">{p.stockQuantity || 0}</td>
                   <td className="p-5">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                       {p.showInPublic && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-blue-50 border border-blue-200/50 text-blue-700 px-2 py-1 rounded-full">Public</span>}
                        {p.isHidden && <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold bg-gray-100 text-gray-500 px-2 py-1 rounded-full"><EyeOff className="w-3 h-3"/>Hidden</span>}
                        {p.isOutofStock && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-amber-50 border border-amber-200/50 text-amber-700 px-2 py-1 rounded-full">Out of Stock</span>}
                        {!p.isHidden && !p.isOutofStock && <span className="inline-flex text-[10px] uppercase tracking-widest font-bold bg-emerald-50 border border-emerald-200/50 text-emerald-700 px-2 py-1 rounded-full">Active</span>}
@@ -626,6 +629,22 @@ export default function AdminPrivateCatalog() {
                   <fieldset>
                     <legend className="text-lg font-serif font-bold text-white border-b border-black/10 w-full mb-6 pb-2">Operational Status</legend>
                     <div className="flex flex-col gap-6">
+
+                      {/* Show in Public Catalogue */}
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                         <button
+                           type="button"
+                           onClick={() => setCurrentProduct({...currentProduct, showInPublic: !currentProduct.showInPublic})}
+                           className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${currentProduct.showInPublic ? 'bg-blue-500' : 'bg-gray-200'}`}
+                         >
+                           <span className={`inline-block h-4 w-4 transform rounded-full bg-navy-900 transition-transform ${currentProduct.showInPublic ? 'translate-x-6' : 'translate-x-1'}`} />
+                         </button>
+                         <div className="flex flex-col">
+                           <span className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors">Show in Public Catalogue</span>
+                           <span className="text-[10px] text-gray-400">When enabled, this exclusive product also appears in the main public catalogue. When disabled, it is only visible in the Exclusive Catalogue.</span>
+                         </div>
+                      </label>
+
                       <label className="flex items-center gap-3 cursor-pointer group">
                          <button
                            type="button"
@@ -636,7 +655,7 @@ export default function AdminPrivateCatalog() {
                          </button>
                          <div className="flex flex-col">
                            <span className="text-sm font-medium text-white group-hover:text-gold-500 transition-colors">Hide from Catalogue</span>
-                           <span className="text-[10px] text-gray-400">Archived items are invisible to public users</span>
+                           <span className="text-[10px] text-gray-400">Archived items are invisible to all users</span>
                          </div>
                       </label>
 

@@ -76,6 +76,8 @@ export default function AdminCatalog() {
       isHidden: false,
       isOutofStock: false,
       showPrice: false,
+      isExclusive: false,
+      showInPublic: false,
       stockQuantity: 0
     });
     

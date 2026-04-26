@@ -109,3 +109,32 @@ NOTIFY pgrst, 'reload schema';
 -- ============================================================
 -- Done! You should now be able to insert/update products.
 -- ============================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS "showInPublic" boolean NOT NULL DEFAULT false;

@@ -88,24 +88,44 @@ export default function Catalog() {
     if (view !== 'products' || !activeSub) return;
     setLoadingProds(true);
     async function load() {
-      let query = supabase
+      const parentCat = categories.find(c => c.id === activeSub!.category_id);
+
+      // Build query for regular (non-exclusive) products
+      let publicQuery = supabase
         .from('products')
         .select('*')
         .eq('isHidden', false)
         .eq('isExclusive', false)
         .eq('subCategory', activeSub!.name);
+      if (parentCat) publicQuery = publicQuery.eq('category', parentCat.name);
 
-      const parentCat = categories.find(c => c.id === activeSub!.category_id);
-      if (parentCat) {
-        query = query.eq('category', parentCat.name);
-      }
+      // Build query for exclusive products that are marked to show in public
+      let sharedQuery = supabase
+        .from('products')
+        .select('*')
+        .eq('isHidden', false)
+        .eq('isExclusive', true)
+        .eq('showInPublic', true)
+        .eq('subCategory', activeSub!.name);
+      if (parentCat) sharedQuery = sharedQuery.eq('category', parentCat.name);
 
-      const { data } = await query;
-      setProducts((data ?? []) as Product[]);
+      const [publicRes, sharedRes] = await Promise.all([publicQuery, sharedQuery]);
+
+      const combined = [
+        ...((publicRes.data ?? []) as Product[]),
+        ...((sharedRes.data ?? []) as Product[]),
+      ];
+
+      // Deduplicate by id (safety measure)
+      const seen = new Set<string>();
+      const deduped = combined.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
+
+      setProducts(deduped);
       setLoadingProds(false);
     }
     load();
   }, [view, activeSub, categories]);
+
 
   // ── Gold rate for price calculation ──────────────────
   const { rate } = useGoldRate();
@@ -119,7 +139,8 @@ export default function Catalog() {
   const filtered = useMemo(() => {
     let r = [...products];
     if (stockFilter === 'in_stock') r = r.filter(p => !p.isOutofStock);
-    r.sort((a, b) => (b.popularityScore || 0) - (a.popularityScore || 0));
+    // Newest first (largest createdAt timestamp = most recent)
+    r.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0));
     return r;
   }, [products, stockFilter]);
 

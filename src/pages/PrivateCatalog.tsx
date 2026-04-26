@@ -83,7 +83,8 @@ export default function PrivateCatalog() {
   const filtered = useMemo(() => {
     let r = [...products];
     if (stockFilter === 'in_stock') r = r.filter(p => !p.isOutofStock);
-    r.sort((a, b) => (b.popularityScore || 0) - (a.popularityScore || 0));
+    // Newest first (largest createdAt timestamp = most recent)
+    r.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0));
     return r;
   }, [products, stockFilter]);
 
