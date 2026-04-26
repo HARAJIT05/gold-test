@@ -7,7 +7,7 @@ import { useGoldRate } from '../hooks/useGoldRate';
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { rate } = useGoldRate();
-  // true once the user has ever visited /private-catalogue on this device
+  // true once the user has ever visited /exclusive-catalogue on this device
   const [hasExclusiveAccess, setHasExclusiveAccess] = useState(
     () => localStorage.getItem('naba_exclusive_access') === '1'
   );
@@ -34,7 +34,7 @@ export function Navbar() {
     { name: 'Home', path: '/' },
     { name: 'Catalogue', path: '/catalogue' },
     ...(hasExclusiveAccess
-      ? [{ name: 'Exclusive Catalogue', path: '/private-catalogue' }]
+      ? [{ name: 'Exclusive Catalogue', path: '/exclusive-catalogue' }]
       : []),
     { name: 'Reviews', path: '/reviews' },
     { name: 'About', path: '/about' },

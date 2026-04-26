@@ -23,7 +23,7 @@ export default function AdminLayout() {
       <Link onClick={() => setMobileMenuOpen(false)} to="/admin/catalogue" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-navy-800 transition-colors">
         <Package className="w-5 h-5 text-gold-400" /> Catalogue Manager
       </Link>
-      <Link onClick={() => setMobileMenuOpen(false)} to="/admin/private-catalogue" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-navy-800 transition-colors">
+      <Link onClick={() => setMobileMenuOpen(false)} to="/admin/exclusive-catalogue" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-navy-800 transition-colors">
         <Lock className="w-5 h-5 text-gold-400" /> Exclusive Catalogue
       </Link>
       <Link onClick={() => setMobileMenuOpen(false)} to="/admin/categories" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-navy-800 transition-colors">

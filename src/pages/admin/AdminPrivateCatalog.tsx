@@ -235,8 +235,8 @@ export default function AdminPrivateCatalog() {
       <div className="mb-8 flex items-start gap-3 bg-navy-900 border border-gold-400/20 rounded-2xl px-5 py-4">
         <span className="text-gold-400 mt-0.5">🔒</span>
         <div>
-          <p className="text-sm font-semibold text-white mb-0.5">Exclusive products — only visible at <span className="text-gold-400 font-mono">/private-catalogue</span></p>
-          <p className="text-xs text-gray-500">Products added here are only accessible at <span className="text-gold-400 font-mono">/private-catalogue</span>. Share this URL only with intended recipients.</p>
+          <p className="text-sm font-semibold text-white mb-0.5">Exclusive products — only visible at <span className="text-gold-400 font-mono">/exclusive-catalogue</span></p>
+          <p className="text-xs text-gray-500">Products added here are only accessible at <span className="text-gold-400 font-mono">/exclusive-catalogue</span>. Share this URL only with intended recipients.</p>
         </div>
       </div>
 
