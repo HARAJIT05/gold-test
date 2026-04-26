@@ -7,6 +7,18 @@ import { useGoldRate } from '../hooks/useGoldRate';
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { rate } = useGoldRate();
+  // true once the user has ever visited /private-catalogue on this device
+  const [hasExclusiveAccess, setHasExclusiveAccess] = useState(
+    () => localStorage.getItem('naba_exclusive_access') === '1'
+  );
+
+  // Keep in sync if the flag gets written while this tab is open
+  useEffect(() => {
+    const handler = () =>
+      setHasExclusiveAccess(localStorage.getItem('naba_exclusive_access') === '1');
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
 
   // Dynamically update the browser favicon whenever the admin logo changes
   useEffect(() => {
@@ -21,6 +33,9 @@ export function Navbar() {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Catalogue', path: '/catalogue' },
+    ...(hasExclusiveAccess
+      ? [{ name: 'Exclusive Catalogue', path: '/private-catalogue' }]
+      : []),
     { name: 'Reviews', path: '/reviews' },
     { name: 'About', path: '/about' },
   ];
