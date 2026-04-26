@@ -111,7 +111,7 @@ export function Footer() {
           <div>
             <h3 className="text-[10px] uppercase font-bold tracking-widest text-white/40 mb-4">Quick Links</h3>
             <ul className="space-y-3">
-              <li><Link to="/catalog" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">Collection</Link></li>
+              <li><Link to="/catalogue" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">Collection</Link></li>
               <li><Link to="/reviews" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">Testimonials</Link></li>
               <li><Link to="/about" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">The Craft</Link></li>
               <li><Link to="/privacy-policy" className="text-gray-400 hover:text-gold-400 text-xs uppercase tracking-widest transition-colors">Privacy Policy</Link></li>

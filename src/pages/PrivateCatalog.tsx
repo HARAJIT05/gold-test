@@ -34,11 +34,6 @@ export default function PrivateCatalog() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { rate } = useGoldRate();
 
-  // ── Grant access: store flag in localStorage so navbar shows the link ──
-  useEffect(() => {
-    localStorage.setItem('hasPrivateAccess', 'true');
-  }, []);
-
   useEffect(() => {
     const openProductId = location.state?.openProductId;
     if (openProductId) {
@@ -49,6 +44,11 @@ export default function PrivateCatalog() {
         });
     }
   }, [location.state, location.pathname, navigate]);
+
+  // ── Mark this browser as having accessed the exclusive catalogue ──────
+  useEffect(() => {
+    localStorage.setItem('naba_exclusive_access', '1');
+  }, []);
 
   useEffect(() => {
     Promise.all([fetchCategories().then(setCategories), fetchSubcategories().then(setSubcategories)])
@@ -91,7 +91,7 @@ export default function PrivateCatalog() {
     <nav className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-bold mb-8 flex-wrap">
       <button onClick={() => { setView('subcategories'); setActiveSub(null); }}
         className="flex items-center gap-1 text-gray-500 hover:text-gold-400 transition-colors">
-        <Home className="w-3 h-3" /> Private Catalog
+        <Home className="w-3 h-3" /> Exclusive Catalogue
       </button>
       {activeSub && (<><ChevronRight className="w-3 h-3 text-gray-600" /><span className="text-white">{activeSub.name}</span></>)}
     </nav>
@@ -103,7 +103,7 @@ export default function PrivateCatalog() {
         <span className="inline-flex items-center gap-1.5 text-[9px] px-3 py-1 rounded-full border border-gold-400/60 text-gold-400 uppercase tracking-[3px] font-bold mb-3">
           <Lock className="w-2.5 h-2.5" /> Exclusive Access
         </span>
-        <h1 className="text-4xl font-serif font-bold text-white mb-2">Private Collection</h1>
+        <h1 className="text-4xl font-serif font-bold text-white mb-2">Exclusive Collection</h1>
         <p className="text-gray-400">Exclusive pieces available by invitation only.</p>
       </div>
 

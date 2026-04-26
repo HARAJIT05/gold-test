@@ -51,8 +51,8 @@ const defaultSlides: HeroSlide[] = [
     badge: "Artisanal Manufacturing",
     heading: "Heritage Craft, Modern Precision.",
     subheading: "Bespoke gold jewelry direct from the Karigar.",
-    ctaText: "Browse Catalog",
-    ctaLink: "/catalog"
+    ctaText: "Browse Catalogue",
+    ctaLink: "/catalogue"
   }
 ];
 

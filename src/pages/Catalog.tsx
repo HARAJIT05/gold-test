@@ -136,7 +136,7 @@ export default function Catalog() {
     <nav className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-bold mb-8 flex-wrap">
       <button onClick={() => { setView('subcategories'); setActiveSub(null); }}
         className="flex items-center gap-1 text-gray-500 hover:text-gold-400 transition-colors">
-        <Home className="w-3 h-3" /> Catalog
+        <Home className="w-3 h-3" /> Catalogue
       </button>
       {activeSub && (
         <>
@@ -148,13 +148,13 @@ export default function Catalog() {
   );
 
   // ─────────────────────────────────────────────────────
-  //  VIEW: Subcategories (Main Catalog View)
+  //  VIEW: Subcategories (Main Catalogue View)
   // ─────────────────────────────────────────────────────
   const SubcategoriesView = (
     <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-serif font-bold text-white mb-2">Our Catalog</h1>
+        <h1 className="text-4xl font-serif font-bold text-white mb-2">Our Catalogue</h1>
         <p className="text-gray-400">Choose a style to explore</p>
       </div>
 

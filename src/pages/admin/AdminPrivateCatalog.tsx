@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../../hooks/useAuth";
 import { logAdminAction } from "../../lib/audit";
 import { fetchCategories, fetchSubcategories, Category, Subcategory } from "../../lib/categories";
+import imageCompression from "browser-image-compression";
 
 export default function AdminPrivateCatalog() {
   const { user } = useAuth();
@@ -152,42 +153,32 @@ export default function AdminPrivateCatalog() {
 
   const handleImageUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
-    
     setUploadingImages(true);
     try {
       const uploadedUrls: string[] = [];
-      
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (!file.type.startsWith('image/')) continue;
-        
-        const fileExt = file.name.split('.').pop();
+
+        // Compress before upload
+        const compressed = await imageCompression(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: 'image/webp',
+        });
+
+        const fileExt = 'webp';
         const fileName = `product-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('assets')
-          .upload(filePath, file);
-
+        const { error: uploadError } = await supabase.storage.from('assets').upload(fileName, compressed);
         if (uploadError) {
-          if (uploadError.message.includes("Bucket not found")) {
-            throw new Error("The 'assets' bucket does not exist in Supabase storage.");
-          }
+          if (uploadError.message.includes("Bucket not found")) throw new Error("The 'assets' bucket does not exist in Supabase storage.");
           throw uploadError;
         }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('assets')
-          .getPublicUrl(filePath);
-
+        const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(fileName);
         uploadedUrls.push(publicUrl);
       }
-
-      setCurrentProduct((prev: any) => ({
-        ...prev,
-        images: [...(prev.images || []), ...uploadedUrls]
-      }));
-      
+      setCurrentProduct((prev: any) => ({ ...prev, images: [...(prev.images || []), ...uploadedUrls] }));
     } catch (err: any) {
       console.error("Upload error:", err);
       alert(err.message || "Failed to upload images.");
@@ -231,7 +222,7 @@ export default function AdminPrivateCatalog() {
   return (
     <div className="relative">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">Private Catalog Manager</h1>
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">Exclusive Catalogue Manager</h1>
         <button 
           onClick={handleAdd}
           className="flex items-center gap-2 bg-navy-900 text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors shadow-sm self-start sm:self-auto"
@@ -244,7 +235,7 @@ export default function AdminPrivateCatalog() {
       <div className="mb-8 flex items-start gap-3 bg-navy-900 border border-gold-400/20 rounded-2xl px-5 py-4">
         <span className="text-gold-400 mt-0.5">🔒</span>
         <div>
-          <p className="text-sm font-semibold text-white mb-0.5">Exclusive products — not visible in the public catalog</p>
+          <p className="text-sm font-semibold text-white mb-0.5">Exclusive products — only visible at <span className="text-gold-400 font-mono">/private-catalogue</span></p>
           <p className="text-xs text-gray-500">Products added here are only accessible at <span className="text-gold-400 font-mono">/private-catalogue</span>. Share this URL only with intended recipients.</p>
         </div>
       </div>
@@ -254,7 +245,7 @@ export default function AdminPrivateCatalog() {
         {loading ? (
           <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gold-400" /></div>
         ) : products.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 font-serif bg-navy-900 rounded-2xl border border-black/5 p-8">No items in the catalog.</div>
+          <div className="text-center py-16 text-gray-400 font-serif bg-navy-900 rounded-2xl border border-black/5 p-8">No items in the catalogue.</div>
         ) : (
           products.map((p) => (
             <div key={p.id} className="bg-navy-900 rounded-2xl border border-white/5 p-4 flex items-start gap-4">
@@ -314,7 +305,7 @@ export default function AdminPrivateCatalog() {
             {loading ? (
                <tr><td colSpan={6} className="p-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gold-400 mx-auto" /></td></tr>
             ) : products.length === 0 ? (
-              <tr><td colSpan={6} className="p-12 text-center text-gray-400 font-serif">No items in the catalog.</td></tr>
+              <tr><td colSpan={6} className="p-12 text-center text-gray-400 font-serif">No items in the catalogue.</td></tr>
             ) : (
               products.map((p) => (
                 <tr key={p.id} className="hover:bg-navy-800/50 transition-colors group">
@@ -644,7 +635,7 @@ export default function AdminPrivateCatalog() {
                            <span className={`inline-block h-4 w-4 transform rounded-full bg-navy-900 transition-transform ${currentProduct.isHidden ? 'translate-x-6' : 'translate-x-1'}`} />
                          </button>
                          <div className="flex flex-col">
-                           <span className="text-sm font-medium text-white group-hover:text-gold-500 transition-colors">Hide from Catalog</span>
+                           <span className="text-sm font-medium text-white group-hover:text-gold-500 transition-colors">Hide from Catalogue</span>
                            <span className="text-[10px] text-gray-400">Archived items are invisible to public users</span>
                          </div>
                       </label>
@@ -673,7 +664,7 @@ export default function AdminPrivateCatalog() {
                          </button>
                          <div className="flex flex-col">
                            <span className="text-sm font-medium text-white group-hover:text-emerald-400 transition-colors">Show Price to Public</span>
-                           <span className="text-[10px] text-gray-400">Displays calculated gold price on homepage &amp; catalog</span>
+                           <span className="text-[10px] text-gray-400">Displays calculated gold price on homepage &amp; catalogue</span>
                          </div>
                       </label>
                     </div>

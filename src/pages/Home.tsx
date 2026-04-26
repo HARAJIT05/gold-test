@@ -346,10 +346,10 @@ export default function Home() {
                           {/* CTA */}
                           <div className="flex items-center gap-4 pt-1">
                             <Link
-                              to="/catalog"
+                              to="/catalogue"
                               className="inline-flex items-center gap-2 bg-gold-400 hover:bg-gold-500 text-navy-950 px-7 py-3.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all duration-300 shadow-[0_8px_30px_rgba(212,160,23,0.25)] hover:shadow-[0_8px_40px_rgba(212,160,23,0.4)] hover:-translate-y-0.5 w-fit"
                             >
-                              Browse Catalog <ArrowRight className="w-3 h-3" />
+                              Browse Catalogue <ArrowRight className="w-3 h-3" />
                             </Link>
                           </div>
                         </div>
@@ -462,7 +462,7 @@ export default function Home() {
                           {s?.subheading}
                         </p>
                         {s?.ctaText && (
-                          <Link to={s.ctaLink || "/catalog"} className="inline-flex items-center gap-2 bg-gold-400 text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors w-fit shadow-lg">
+                          <Link to={s.ctaLink || "/catalogue"} className="inline-flex items-center gap-2 bg-gold-400 text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gold-500 transition-colors w-fit shadow-lg">
                             {s.ctaText} <ArrowRight className="w-3.5 h-3.5" />
                           </Link>
                         )}
@@ -555,7 +555,7 @@ export default function Home() {
                 const price = product.showPrice && rate.rate22k > 0 ? calcPrice(product) : null;
                 return (
                   <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: idx * 0.12 }}>
-                    <Link to="/catalog" state={{ openProductId: product.id }} className="block bg-navy-900 rounded-2xl overflow-hidden group border border-white/5 hover:border-gold-400/30 transition-all duration-300 hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)]">
+                    <Link to="/catalogue" state={{ openProductId: product.id }} className="block bg-navy-900 rounded-2xl overflow-hidden group border border-white/5 hover:border-gold-400/30 transition-all duration-300 hover:shadow-[0_8px_40px_rgba(0,0,0,0.25)]">
                       <div className="aspect-square bg-navy-800 relative overflow-hidden">
                         {imageUrl ? (
                           <img src={imageUrl} alt={product.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
@@ -596,7 +596,7 @@ export default function Home() {
           )}
 
           <div className="mt-14 text-center">
-            <Link to="/catalog" className="inline-flex items-center gap-2 px-8 py-3.5 bg-navy-900 border border-white/10 text-white font-medium rounded-full hover:bg-navy-800 hover:border-gold-400/30 transition-all text-sm">
+            <Link to="/catalogue" className="inline-flex items-center gap-2 px-8 py-3.5 bg-navy-900 border border-white/10 text-white font-medium rounded-full hover:bg-navy-800 hover:border-gold-400/30 transition-all text-sm">
               View Full Collection <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

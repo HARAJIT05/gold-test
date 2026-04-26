@@ -30,7 +30,7 @@ export default function App() {
       <Routes>
       <Route element={<RootLayout />}>
         <Route index element={<Home />} />
-        <Route path="catalog" element={<Catalog />} />
+        <Route path="catalogue" element={<Catalog />} />
         <Route path="private-catalogue" element={<PrivateCatalog />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="about" element={<About />} />
@@ -42,7 +42,7 @@ export default function App() {
       
       <Route path="admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
-        <Route path="catalog" element={<AdminCatalog />} />
+        <Route path="catalogue" element={<AdminCatalog />} />
         <Route path="private-catalogue" element={<AdminPrivateCatalog />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="reviews" element={<AdminReviews />} />

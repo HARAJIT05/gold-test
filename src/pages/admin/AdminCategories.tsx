@@ -165,7 +165,7 @@ export default function AdminCategories() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">Category Manager</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage categories and subcategories for your catalog</p>
+          <p className="text-gray-500 text-sm mt-1">Manage categories and subcategories for your catalogue</p>
         </div>
         <button
           onClick={() => openAdd('category')}
