@@ -27,7 +27,7 @@ export default function About() {
             <div className="relative">
               <div className="absolute inset-0 bg-gold-400/10 rounded-2xl -rotate-3 transform origin-bottom-left"></div>
               <img
-                src="https://picsum.photos/seed/workshop/800/600"
+                src="/craftmen.jpeg"
                 alt="Our Workshop"
                 className="relative rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.3)] border-[8px] border-navy-900 z-10 w-full"
                 referrerPolicy="no-referrer"
@@ -60,7 +60,7 @@ export default function About() {
             <div className="relative order-1 md:order-2">
               <div className="absolute inset-0 bg-gold-400/10 rounded-2xl rotate-3 transform origin-bottom-right"></div>
               <img
-                src="/purity.png"
+                src="/purity.jpeg"
                 alt="Redlands EDX 3000 – Gold Purity Spectrometer"
                 className="relative rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.3)] border-[8px] border-navy-900 z-10 w-full object-contain bg-white"
               />
