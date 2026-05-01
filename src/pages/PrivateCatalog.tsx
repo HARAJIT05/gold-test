@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'motion/react';
 import { Loader2, Search, Eye, ChevronRight, Home, LayoutGrid, Lock } from 'lucide-react';
@@ -17,42 +17,79 @@ interface Product {
   stockQuantity: number; showPrice: boolean; isExclusive: boolean;
 }
 
-type View = 'subcategories' | 'products';
-
 export default function PrivateCatalog() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [view, setView] = useState<View>('subcategories');
-  const [activeCat, setActiveCat] = useState<Category | null>(null);
-  const [activeSub, setActiveSub] = useState<Subcategory | null>(null);
+  const [searchParams] = useSearchParams();
+
+  // ── URL-driven navigation state ───────────────────────────────────────
+  // `sub`     → name of the active subcategory (products view)
+  // `product` → id of the open product modal
+  const subParam = searchParams.get('sub');
+  const productParam = searchParams.get('product');
+
+  // Data
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
   const [loadingProds, setLoadingProds] = useState(false);
+
+  // Local filter chip — stays as React state (not a navigation level)
+  const [activeCat, setActiveCat] = useState<Category | null>(null);
+
+  // Stock filter
   const [stockFilter, setStockFilter] = useState<'all' | 'in_stock'>('in_stock');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // ── Gold rate ─────────────────────────────────────────────────────────
   const { rate } = useGoldRate();
 
+  // Derived from URL
+  const activeSub = useMemo(
+    () => subcategories.find(s => s.name === subParam) ?? null,
+    [subcategories, subParam]
+  );
+
+  const selectedProductState = useMemo(
+    () => products.find(p => p.id === productParam) ?? null,
+    [products, productParam]
+  );
+
+  // ── Handle incoming deep-link (location.state.openProductId) ──────────
   useEffect(() => {
     const openProductId = location.state?.openProductId;
-    if (openProductId) {
-      supabase.from('products').select('*').eq('id', openProductId).eq('isExclusive', true).single()
-        .then(({ data }) => {
-          if (data) setSelectedProduct(data as Product);
+    if (!openProductId) return;
+
+    supabase
+      .from('products')
+      .select('*')
+      .eq('id', openProductId)
+      .eq('isExclusive', true)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          const product = data as Product;
+          const params = new URLSearchParams();
+          if (product.subCategory) params.set('sub', product.subCategory);
+          params.set('product', product.id);
+          navigate({ search: params.toString() }, { replace: true });
+        } else {
           navigate(location.pathname, { replace: true, state: {} });
-        });
-    }
+        }
+      });
   }, [location.state, location.pathname, navigate]);
 
-  // ── Mark this browser as having accessed the exclusive catalogue ──────
+  // ── Mark this browser as having accessed the exclusive catalogue ───────
   useEffect(() => {
     localStorage.setItem('naba_exclusive_access', '1');
   }, []);
 
+  // ── Load categories & subcategories on mount ──────────────────────────
   useEffect(() => {
-    Promise.all([fetchCategories().then(setCategories), fetchSubcategories().then(setSubcategories)])
-      .finally(() => setLoadingCats(false));
+    Promise.all([
+      fetchCategories().then(setCategories),
+      fetchSubcategories().then(setSubcategories),
+    ]).finally(() => setLoadingCats(false));
   }, []);
 
   const visibleSubcategories = useMemo(() => {
@@ -60,12 +97,20 @@ export default function PrivateCatalog() {
     return subcategories.filter(s => s.category_id === activeCat.id);
   }, [subcategories, activeCat]);
 
+  // ── Load products when a subcategory is selected ──────────────────────
   useEffect(() => {
-    if (view !== 'products' || !activeSub) return;
+    if (!activeSub) {
+      setProducts([]);
+      return;
+    }
     setLoadingProds(true);
     async function load() {
-      let query = supabase.from('products').select('*')
-        .eq('isHidden', false).eq('isExclusive', true).eq('subCategory', activeSub!.name);
+      let query = supabase
+        .from('products')
+        .select('*')
+        .eq('isHidden', false)
+        .eq('isExclusive', true)
+        .eq('subCategory', activeSub!.name);
       const parentCat = categories.find(c => c.id === activeSub!.category_id);
       if (parentCat) query = query.eq('category', parentCat.name);
       const { data } = await query;
@@ -73,7 +118,22 @@ export default function PrivateCatalog() {
       setLoadingProds(false);
     }
     load();
-  }, [view, activeSub, categories]);
+  }, [activeSub, categories]);
+
+  // ── If productParam is set but products haven't loaded yet,
+  //    fetch the single product directly so the modal can open ─────────
+  useEffect(() => {
+    if (!productParam || products.length > 0) return;
+    supabase
+      .from('products')
+      .select('*')
+      .eq('id', productParam)
+      .eq('isExclusive', true)
+      .single()
+      .then(({ data }) => {
+        if (data) setProducts([data as Product]);
+      });
+  }, [productParam, products.length]);
 
   const calcPrice = (p: Product) => {
     const base = p.weightInGrams * rate.rate22k;
@@ -83,21 +143,61 @@ export default function PrivateCatalog() {
   const filtered = useMemo(() => {
     let r = [...products];
     if (stockFilter === 'in_stock') r = r.filter(p => !p.isOutofStock);
-    // Newest first (largest createdAt timestamp = most recent)
+    // Newest first
     r.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0));
     return r;
   }, [products, stockFilter]);
 
+  // ── Navigation helpers (push URL history entries) ─────────────────────
+
+  /** Enter a subcategory's product list */
+  const goToSubcategory = (sub: Subcategory) => {
+    navigate({ search: `sub=${encodeURIComponent(sub.name)}` });
+  };
+
+  /** Open a product modal */
+  const openProduct = (product: Product) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('product', product.id);
+    navigate({ search: params.toString() });
+  };
+
+  /** Close the product modal — go back one step in history */
+  const closeProduct = () => {
+    navigate(-1);
+  };
+
+  /** Go back to subcategory grid from breadcrumb */
+  const goToCatalogueRoot = () => {
+    navigate({ search: '' }); // clears all params → /exclusive-catalogue
+  };
+
+  // ── Derived view ───────────────────────────────────────────────────────
+  const view: 'subcategories' | 'products' = subParam ? 'products' : 'subcategories';
+
+  // ─────────────────────────────────────────────────────
+  //  SHARED: Breadcrumb
+  // ─────────────────────────────────────────────────────
   const Breadcrumb = () => (
     <nav className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-bold mb-8 flex-wrap">
-      <button onClick={() => { setView('subcategories'); setActiveSub(null); }}
-        className="flex items-center gap-1 text-gray-500 hover:text-gold-400 transition-colors">
+      <button
+        onClick={goToCatalogueRoot}
+        className="flex items-center gap-1 text-gray-500 hover:text-gold-400 transition-colors"
+      >
         <Home className="w-3 h-3" /> Exclusive Catalogue
       </button>
-      {activeSub && (<><ChevronRight className="w-3 h-3 text-gray-600" /><span className="text-white">{activeSub.name}</span></>)}
+      {activeSub && (
+        <>
+          <ChevronRight className="w-3 h-3 text-gray-600" />
+          <span className="text-white">{activeSub.name}</span>
+        </>
+      )}
     </nav>
   );
 
+  // ─────────────────────────────────────────────────────
+  //  VIEW: Subcategories
+  // ─────────────────────────────────────────────────────
   const SubcategoriesView = (
     <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-8">
@@ -108,14 +208,18 @@ export default function PrivateCatalog() {
         <p className="text-gray-400">Exclusive pieces available by invitation only.</p>
       </div>
 
+      {/* Category filter chips */}
       <div className="flex flex-wrap items-center gap-2 mb-10">
-        <button onClick={() => setActiveCat(null)}
-          className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${activeCat === null ? 'bg-gold-400 text-navy-950' : 'bg-navy-900 text-gray-400 border border-white/10 hover:border-gold-400/50 hover:text-gold-400'}`}>
+        <button
+          onClick={() => setActiveCat(null)}
+          className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${activeCat === null ? 'bg-gold-400 text-navy-950' : 'bg-navy-900 text-gray-400 border border-white/10 hover:border-gold-400/50 hover:text-gold-400'}`}
+        >
           All Items
         </button>
         {categories.map(cat => (
           <button key={cat.id} onClick={() => setActiveCat(cat)}
-            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${activeCat?.id === cat.id ? 'bg-gold-400 text-navy-950' : 'bg-navy-900 text-gray-400 border border-white/10 hover:border-gold-400/50 hover:text-gold-400'}`}>
+            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${activeCat?.id === cat.id ? 'bg-gold-400 text-navy-950' : 'bg-navy-900 text-gray-400 border border-white/10 hover:border-gold-400/50 hover:text-gold-400'}`}
+          >
             {cat.name}
           </button>
         ))}
@@ -134,8 +238,9 @@ export default function PrivateCatalog() {
           {visibleSubcategories.map((sub, i) => (
             <motion.button key={sub.id}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-              onClick={() => { setActiveSub(sub); setView('products'); }}
-              className="group relative rounded-3xl overflow-hidden aspect-square bg-navy-900 border border-white/10 hover:border-gold-400/50 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_32px_rgba(253,179,82,0.1)] cursor-pointer text-left flex flex-col">
+              onClick={() => goToSubcategory(sub)}
+              className="group relative rounded-3xl overflow-hidden aspect-square bg-navy-900 border border-white/10 hover:border-gold-400/50 transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_32px_rgba(253,179,82,0.1)] cursor-pointer text-left flex flex-col"
+            >
               {sub.image
                 ? <img src={sub.image} alt={sub.name} referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 : <div className="absolute inset-0 flex items-center justify-center"><LayoutGrid className="w-10 h-10 text-white/10" /></div>}
@@ -157,13 +262,16 @@ export default function PrivateCatalog() {
     </div>
   );
 
+  // ─────────────────────────────────────────────────────
+  //  VIEW: Products
+  // ─────────────────────────────────────────────────────
   const ProductsView = (
     <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
       <Breadcrumb />
       <div className="flex flex-col md:flex-row justify-between mb-8 items-start md:items-center border-b border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-4xl font-serif font-bold text-white">{activeSub?.name}</h1>
+            <h1 className="text-4xl font-serif font-bold text-white">{activeSub?.name ?? subParam}</h1>
             <span className="inline-flex items-center gap-1 text-[9px] px-2.5 py-1 rounded-full border border-gold-400/40 text-gold-400 uppercase tracking-widest font-bold">
               <Lock className="w-2.5 h-2.5" /> Private
             </span>
@@ -197,8 +305,9 @@ export default function PrivateCatalog() {
             {filtered.map((product, idx) => (
               <motion.div key={product.id}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                onClick={() => setSelectedProduct(product)}
-                className="bg-navy-900 group rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-gold-400/20 flex flex-col cursor-pointer hover:border-gold-400/50 hover:shadow-[0_10px_40px_rgba(253,179,82,0.08)] transition-all duration-300">
+                onClick={() => openProduct(product)}
+                className="bg-navy-900 group rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-gold-400/20 flex flex-col cursor-pointer hover:border-gold-400/50 hover:shadow-[0_10px_40px_rgba(253,179,82,0.08)] transition-all duration-300"
+              >
                 <div className="aspect-[4/3] bg-navy-800 overflow-hidden relative border-b border-white/5">
                   {product.images?.length > 0
                     ? <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" referrerPolicy="no-referrer" />
@@ -250,10 +359,15 @@ export default function PrivateCatalog() {
     </div>
   );
 
+  // ─────────────────────────────────────────────────────
+  //  RENDER
+  // ─────────────────────────────────────────────────────
   return (
     <>
       {view === 'subcategories' ? SubcategoriesView : ProductsView}
-      {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+      {selectedProductState && (
+        <ProductModal product={selectedProductState} onClose={closeProduct} />
+      )}
     </>
   );
 }
